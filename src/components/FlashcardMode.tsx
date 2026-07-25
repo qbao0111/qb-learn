@@ -46,6 +46,7 @@ export function FlashcardMode() {
           setFlashIndex(0);
         }} 
         title="Thiết lập Thẻ ghi nhớ"
+        storageKey="flashcard_settings"
       />
     );
   }

@@ -5,24 +5,44 @@ export interface StudySettings {
   start: number;
   end: number;
   shuffle: boolean;
+  shuffleOptions?: boolean;
 }
 
 interface StudySetupProps {
   totalQuestions: number;
   onStart: (settings: StudySettings) => void;
   title: string;
+  storageKey?: string;
+  showShuffleOptions?: boolean;
 }
 
-export function StudySetup({ totalQuestions, onStart, title }: StudySetupProps) {
-  const [start, setStart] = useState<number>(1);
-  const [end, setEnd] = useState<number>(totalQuestions);
-  const [shuffle, setShuffle] = useState<boolean>(false);
+export function StudySetup({ totalQuestions, onStart, title, storageKey, showShuffleOptions }: StudySetupProps) {
+  // Load initial settings from localStorage
+  const initialSettings = storageKey ? JSON.parse(localStorage.getItem(storageKey) || '{}') : {};
+  
+  const [start, setStart] = useState<string>(initialSettings.start?.toString() || '1');
+  const [end, setEnd] = useState<string>(initialSettings.end?.toString() || totalQuestions.toString());
+  const [shuffle, setShuffle] = useState<boolean>(initialSettings.shuffle || false);
+  const [shuffleOptions, setShuffleOptions] = useState<boolean>(initialSettings.shuffleOptions || false);
 
   const handleStart = () => {
     // Validate range
-    let validStart = Math.max(1, Math.min(start, totalQuestions));
-    let validEnd = Math.max(validStart, Math.min(end, totalQuestions));
-    onStart({ start: validStart, end: validEnd, shuffle });
+    let s = parseInt(start, 10);
+    let e = parseInt(end, 10);
+    
+    if (isNaN(s)) s = 1;
+    if (isNaN(e)) e = totalQuestions;
+
+    let validStart = Math.max(1, Math.min(s, totalQuestions));
+    let validEnd = Math.max(validStart, Math.min(e, totalQuestions));
+    
+    const settings = { start: validStart, end: validEnd, shuffle, shuffleOptions };
+    
+    if (storageKey) {
+      localStorage.setItem(storageKey, JSON.stringify(settings));
+    }
+    
+    onStart(settings);
   };
 
   return (
@@ -42,22 +62,20 @@ export function StudySetup({ totalQuestions, onStart, title }: StudySetupProps) 
               <div className="flex-1">
                 <span className="text-xs text-text-muted mb-1 block">Từ câu:</span>
                 <input
-                  type="number"
-                  min={1}
-                  max={totalQuestions}
+                  type="text"
+                  inputMode="numeric"
                   value={start}
-                  onChange={(e) => setStart(Number(e.target.value) || 1)}
+                  onChange={(e) => setStart(e.target.value.replace(/\D/g, ''))}
                   className="w-full px-4 py-3 bg-background border border-border rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                 />
               </div>
               <div className="flex-1">
                 <span className="text-xs text-text-muted mb-1 block">Đến câu:</span>
                 <input
-                  type="number"
-                  min={1}
-                  max={totalQuestions}
+                  type="text"
+                  inputMode="numeric"
                   value={end}
-                  onChange={(e) => setEnd(Number(e.target.value) || totalQuestions)}
+                  onChange={(e) => setEnd(e.target.value.replace(/\D/g, ''))}
                   className="w-full px-4 py-3 bg-background border border-border rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                 />
               </div>
@@ -82,6 +100,27 @@ export function StudySetup({ totalQuestions, onStart, title }: StudySetupProps) 
               <div className={`absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${shuffle ? 'transform translate-x-6' : ''}`}></div>
             </div>
           </label>
+
+          {showShuffleOptions && (
+            <label className="flex items-center justify-between p-4 bg-background border border-border rounded-xl cursor-pointer hover:bg-surface-2 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${shuffleOptions ? 'bg-primary text-white' : 'bg-surface-2 text-text-muted'}`}>
+                  <Shuffle size={18} />
+                </div>
+                <span className="font-medium text-text">Đảo đáp án (A, B, C, D)</span>
+              </div>
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  checked={shuffleOptions}
+                  onChange={(e) => setShuffleOptions(e.target.checked)}
+                  className="sr-only"
+                />
+                <div className={`block w-14 h-8 rounded-full transition-colors ${shuffleOptions ? 'bg-primary' : 'bg-surface-2'}`}></div>
+                <div className={`absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${shuffleOptions ? 'transform translate-x-6' : ''}`}></div>
+              </div>
+            </label>
+          )}
 
           <button
             onClick={handleStart}

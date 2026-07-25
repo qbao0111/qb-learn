@@ -8,7 +8,7 @@ import { playSound } from '../lib/sound';
 
 export function LearnMode() {
   const activeQuestions = useActiveQuestions();
-  const [settings, setSettings] = useState<{start: number, end: number, shuffle: boolean} | null>(null);
+  const [settings, setSettings] = useState<{start: number, end: number, shuffle: boolean, shuffleOptions?: boolean} | null>(null);
 
   // Derive the session questions based on settings
   const sessionQuestions = useMemo(() => {
@@ -25,7 +25,7 @@ export function LearnMode() {
     return q;
   }, [activeQuestions, settings]);
 
-  const session = useLearnSession(sessionQuestions);
+  const session = useLearnSession(sessionQuestions, settings?.shuffleOptions);
   
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
@@ -37,6 +37,19 @@ export function LearnMode() {
     setIsAnswered(false);
     setIsCorrect(false);
   }, [session.currentQuestion]);
+
+  // Handle spacebar to go to next question
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && isAnswered) {
+        e.preventDefault();
+        session.nextQuestion();
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isAnswered, session.nextQuestion]);
 
   useEffect(() => {
     if (session.isFinished) {
@@ -58,6 +71,8 @@ export function LearnMode() {
         totalQuestions={activeQuestions.length} 
         onStart={setSettings} 
         title="Thiết lập Học"
+        storageKey="learn_settings"
+        showShuffleOptions={true}
       />
     );
   }
@@ -234,9 +249,9 @@ export function LearnMode() {
               )}
               <button 
                 onClick={session.nextQuestion}
-                className="w-full py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary-hover transition-colors shadow-lg shadow-primary/25 text-lg"
+                className="w-full py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary-hover transition-colors shadow-lg shadow-primary/25 text-lg flex items-center justify-center gap-2"
               >
-                Tiếp tục
+                Tiếp tục <span className="text-primary-foreground/70 text-sm font-normal">(Phím Space)</span>
               </button>
             </motion.div>
           )}
