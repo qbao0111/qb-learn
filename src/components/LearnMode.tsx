@@ -5,6 +5,8 @@ import { useActiveQuestions } from '../hooks/useActiveQuestions';
 import { StudySetup } from './StudySetup';
 import { CheckCircle2, XCircle, GraduationCap, RefreshCw } from 'lucide-react';
 import { playSound } from '../lib/sound';
+import { getQuestionAnswerKeys } from '../lib/answer-utils';
+import { QuestionImage } from './QuestionImage';
 
 export function LearnMode() {
   const activeQuestions = useActiveQuestions();
@@ -27,13 +29,13 @@ export function LearnMode() {
 
   const session = useLearnSession(sessionQuestions, settings?.shuffleOptions);
   
-  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [isAnswered, setIsAnswered] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
 
   // Reset state when question changes
   useEffect(() => {
-    setSelectedKey(null);
+    setSelectedKeys([]);
     setIsAnswered(false);
     setIsCorrect(false);
   }, [session.currentQuestion]);
@@ -129,11 +131,13 @@ export function LearnMode() {
   const { currentQuestion } = session;
   if (!currentQuestion) return null;
 
-  const handleSelect = (key: string) => {
+  const correctKeys = getQuestionAnswerKeys(currentQuestion);
+  const isMultiple = correctKeys.length > 1;
+
+  const submitAnswer = (keys: string[]) => {
     if (isAnswered) return;
-    
-    setSelectedKey(key);
-    const correct = session.answerQuestion(key);
+
+    const correct = session.answerQuestion(keys);
     setIsCorrect(Boolean(correct));
     setIsAnswered(true);
     
@@ -144,7 +148,26 @@ export function LearnMode() {
     }
   };
 
-  const correctAnswerText = currentQuestion.options.find(o => o.key === currentQuestion.answer)?.text || currentQuestion.answer;
+  const handleSelect = (key: string) => {
+    if (isAnswered) return;
+    if (!isMultiple) {
+      setSelectedKeys([key]);
+      submitAnswer([key]);
+      return;
+    }
+    setSelectedKeys((current) =>
+      current.includes(key)
+        ? current.filter((selectedKey) => selectedKey !== key)
+        : [...current, key],
+    );
+  };
+
+  const correctAnswerText = correctKeys
+    .map((key) => {
+      const text = currentQuestion.options.find((option) => option.key === key)?.text;
+      return text ? `${key}. ${text}` : key;
+    })
+    .join(' · ');
 
   return (
     <div className="w-full max-w-3xl mx-auto flex flex-col h-full py-6">
@@ -187,12 +210,22 @@ export function LearnMode() {
             <h3 className="text-2xl font-bold text-text leading-relaxed">
               {currentQuestion.question}
             </h3>
+            {currentQuestion.imageDataUrl && (
+              <div className="mt-6">
+                <QuestionImage src={currentQuestion.imageDataUrl} />
+              </div>
+            )}
           </div>
 
           <div className="space-y-3">
+            {isMultiple && !isAnswered && (
+              <p className="mb-4 inline-flex rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">
+                Chọn {correctKeys.length} đáp án, sau đó kiểm tra
+              </p>
+            )}
             {currentQuestion.options.map((opt) => {
-              const isSelected = selectedKey === opt.key;
-              const isActuallyCorrect = currentQuestion.answer === opt.key || (currentQuestion.answerKeys && currentQuestion.answerKeys.includes(opt.key));
+              const isSelected = selectedKeys.includes(opt.key);
+              const isActuallyCorrect = correctKeys.includes(opt.key);
               
               let btnClass = "w-full text-left p-5 rounded-xl border-2 transition-all font-medium text-lg flex items-start gap-4 ";
               
@@ -235,6 +268,17 @@ export function LearnMode() {
             })}
           </div>
 
+          {isMultiple && !isAnswered && (
+            <button
+              type="button"
+              onClick={() => submitAnswer(selectedKeys)}
+              disabled={selectedKeys.length === 0}
+              className="mt-5 w-full rounded-xl bg-primary py-4 text-lg font-bold text-white shadow-lg shadow-primary/25 transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-45"
+            >
+              Kiểm tra đáp án ({selectedKeys.length}/{correctKeys.length})
+            </button>
+          )}
+
           {isAnswered && (
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
@@ -244,7 +288,7 @@ export function LearnMode() {
               {!isCorrect && (
                 <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-xl">
                   <p className="font-semibold text-orange-800 mb-1">Đáp án đúng là:</p>
-                  <p className="text-orange-900">{currentQuestion.answer}. {correctAnswerText}</p>
+                  <p className="text-orange-900">{correctAnswerText}</p>
                 </div>
               )}
               <button 

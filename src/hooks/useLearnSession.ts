@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { Question } from '../store';
+import { areAnswerSetsEqual, getQuestionAnswerKeys } from '../lib/answer-utils';
 
 export function useLearnSession(questions: Question[], shuffleOptions: boolean = false) {
   const [learningQueue, setLearningQueue] = useState<Question[]>([]);
@@ -16,7 +17,7 @@ export function useLearnSession(questions: Question[], shuffleOptions: boolean =
         // Deep clone question and options
         const clonedQ = { ...q, options: q.options.map(o => ({ ...o })) };
         
-        // Original keys (e.g. ['A', 'B', 'C', 'D'])
+        // Original keys (e.g. ['A', 'B', 'C', ...])
         const originalKeys = clonedQ.options.map(o => o.key);
         
         // Shuffle the options using Fisher-Yates algorithm
@@ -38,6 +39,10 @@ export function useLearnSession(questions: Question[], shuffleOptions: boolean =
         if (clonedQ.answer && oldToNewKeyMap[clonedQ.answer]) {
           clonedQ.answer = oldToNewKeyMap[clonedQ.answer];
         }
+
+        if (clonedQ.answerKey && oldToNewKeyMap[clonedQ.answerKey]) {
+          clonedQ.answerKey = oldToNewKeyMap[clonedQ.answerKey];
+        }
         
         if (clonedQ.answerKeys) {
           clonedQ.answerKeys = clonedQ.answerKeys.map(k => oldToNewKeyMap[k] || k);
@@ -55,11 +60,14 @@ export function useLearnSession(questions: Question[], shuffleOptions: boolean =
 
   const currentQuestion = learningQueue[currentIndex];
 
-  const answerQuestion = useCallback((selectedKey: string) => {
+  const answerQuestion = useCallback((selected: string | string[]) => {
     if (!currentQuestion) return false;
 
-    const isCorrect = currentQuestion.answer === selectedKey || 
-                      (currentQuestion.answerKeys && currentQuestion.answerKeys.includes(selectedKey));
+    const selectedKeys = Array.isArray(selected) ? selected : [selected];
+    const isCorrect = areAnswerSetsEqual(
+      selectedKeys,
+      getQuestionAnswerKeys(currentQuestion),
+    );
 
     if (isCorrect) {
       setStats(prev => ({ ...prev, correct: prev.correct + 1 }));

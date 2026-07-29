@@ -6,17 +6,19 @@ import {
   Sun,
   Layout,
   Volume2,
-  VolumeX
+  VolumeX,
+  Database
 } from 'lucide-react';
 import { FlashcardMode } from './components/FlashcardMode';
 import { Overview } from './components/Overview';
 import { LearnMode } from './components/LearnMode';
 import { ExamMode } from './components/ExamMode';
+import { QuestionManager } from './components/QuestionManager';
 
 import { useStore } from './store';
 
 function App() {
-  const [mode, setMode] = useState<'overview' | 'flashcards' | 'learn' | 'exam'>('overview');
+  const [mode, setMode] = useState<'overview' | 'flashcards' | 'learn' | 'exam' | 'manage'>('overview');
   const soundEnabled = useStore(state => state.soundEnabled);
   const toggleSound = useStore(state => state.toggleSound);
 
@@ -65,6 +67,16 @@ function App() {
             <ListChecks size={20} />
             Kiểm tra
           </button>
+          
+          <div className="my-2 border-t border-border"></div>
+          
+          <button 
+            onClick={() => setMode('manage')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${mode === 'manage' ? 'bg-primary/10 text-primary' : 'text-text-muted hover:bg-surface-2 hover:text-text'}`}
+          >
+            <Database size={20} />
+            Quản lý dữ liệu
+          </button>
         </nav>
       </aside>
 
@@ -100,6 +112,7 @@ function App() {
 
           {mode === 'learn' && <LearnMode />}
           {mode === 'exam' && <ExamMode />}
+          {mode === 'manage' && <QuestionManager />}
         </div>
       </main>
     </div>

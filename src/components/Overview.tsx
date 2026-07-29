@@ -1,11 +1,20 @@
 import { useState, useRef } from 'react';
-import { Upload, FileText, Trash2, CheckCircle2, X } from 'lucide-react';
+import {
+  Upload,
+  FileText,
+  Trash2,
+  CheckCircle2,
+  X,
+  Download,
+  LoaderCircle,
+} from 'lucide-react';
 import { useStore } from '../store';
 import { parseQuizletPdf } from '../lib/pdf-loader';
 import {
   prepareImportedQuestions,
   suggestBankName,
 } from '../lib/import-bank';
+import { downloadQuizletPdf } from '../lib/quizlet-pdf-export';
 
 export function Overview() {
   const { banks, activeBankId, setActiveBank, addBank, deleteBank } = useStore();
@@ -15,6 +24,8 @@ export function Overview() {
   const [statusType, setStatusType] = useState<'idle' | 'selected' | 'success' | 'error'>('idle');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [bankName, setBankName] = useState('');
+  const [exportingBankId, setExportingBankId] = useState<string | null>(null);
+  const [exportError, setExportError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const applySelectedFile = (file?: File) => {
@@ -88,6 +99,21 @@ export function Overview() {
       setStatus(`Không tạo được bộ đề: ${err?.message || 'Lỗi không xác định'}`);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleExport = async (bank: (typeof banks)[number]) => {
+    if (exportingBankId) return;
+
+    setExportingBankId(bank.id);
+    setExportError('');
+    try {
+      await downloadQuizletPdf(bank);
+    } catch (error) {
+      console.error('Quizlet PDF export failed', error);
+      setExportError(`Không thể xuất PDF cho bộ đề "${bank.name}". Vui lòng thử lại.`);
+    } finally {
+      setExportingBankId(null);
     }
   };
 
@@ -200,6 +226,12 @@ export function Overview() {
           <h3 className="text-xl font-bold text-text">Quản lý bộ đề</h3>
         </div>
         
+        {exportError && (
+          <p className="m-4 rounded-xl bg-red-50 px-3 py-2 text-sm font-medium text-red-700" role="alert">
+            {exportError}
+          </p>
+        )}
+
         <div className="divide-y divide-border">
           {banks.map(bank => (
             <div key={bank.id} className={`p-4 flex items-center justify-between transition-colors ${activeBankId === bank.id ? 'bg-primary/5' : 'hover:bg-surface-2'}`}>
@@ -219,6 +251,27 @@ export function Overview() {
                 </p>
               </div>
               
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  void handleExport(bank);
+                }}
+                disabled={Boolean(exportingBankId)}
+                className="ml-3 inline-flex shrink-0 items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-wait disabled:opacity-60"
+                title={`Xuất ${bank.name} thành PDF Quizlet`}
+                aria-label={`Xuất ${bank.name} thành PDF Quizlet`}
+              >
+                {exportingBankId === bank.id ? (
+                  <LoaderCircle size={18} className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <Download size={18} aria-hidden="true" />
+                )}
+                <span className="hidden sm:inline">
+                  {exportingBankId === bank.id ? 'Đang xuất...' : 'Xuất PDF'}
+                </span>
+              </button>
+
               {banks.length > 1 && (
                 <button 
                   onClick={() => deleteBank(bank.id)}

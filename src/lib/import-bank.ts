@@ -1,4 +1,5 @@
 import type { Question } from '../store';
+import { getQuestionAnswerKeys } from './answer-utils.ts';
 
 export interface ImportReport {
   extracted: number;
@@ -15,17 +16,32 @@ export interface PreparedImport {
   report: ImportReport;
 }
 
+export function normalizeQuestionAnswers(
+  question: Omit<Question, 'id'>,
+): Omit<Question, 'id'> {
+  const answerKeys = getQuestionAnswerKeys(question);
+  const primaryAnswer = answerKeys[0] || String(question.answer || '').trim().toUpperCase();
+
+  return {
+    ...question,
+    answer: primaryAnswer,
+    answerKey: primaryAnswer,
+    answerKeys,
+  };
+}
+
 const UUID_FILE_NAME =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export function isUsableQuestion(question: Question | null | undefined) {
+  const hasUsableAnswer = Boolean(question && getQuestionAnswerKeys(question).length);
+
   return Boolean(
     question &&
       question.question?.trim() &&
       Array.isArray(question.options) &&
       question.options.length >= 2 &&
-      Array.isArray(question.answerKeys) &&
-      question.answerKeys.length,
+      hasUsableAnswer,
   );
 }
 

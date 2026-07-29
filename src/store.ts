@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { questions as defaultQuestions } from './data/questions';
+import { isUsableQuestion, normalizeQuestionAnswers } from './lib/import-bank';
+import { getQuestionAnswerKeys } from './lib/answer-utils';
 
 export interface Question {
   id: number;
@@ -11,6 +13,7 @@ export interface Question {
   answerKeys?: string[];
   explanation?: string;
   metadata?: string;
+  imageDataUrl?: string;
 }
 
 export interface BankReport {
@@ -45,6 +48,39 @@ interface AppState {
   getActiveQuestions: () => Question[];
   deleteBank: (id: string) => void;
   toggleSound: () => void;
+  addQuestion: (bankId: string, question: Omit<Question, 'id'>) => void;
+  updateQuestion: (bankId: string, questionId: number, question: Omit<Question, 'id'>) => void;
+  deleteQuestion: (bankId: string, questionId: number) => void;
+}
+
+function updateBankQuestions(bank: Bank, questions: Question[]): Bank {
+  if (!bank.report) return { ...bank, questions };
+
+  const usableQuestions = questions.filter((question) => isUsableQuestion(question));
+  const maxSourceId = Math.max(0, ...questions.map((question) => question.id || 0));
+  const ids = new Set(questions.map((question) => question.id));
+  const issueQuestions = questions.filter((question) => !isUsableQuestion(question));
+
+  return {
+    ...bank,
+    questions,
+    report: {
+      ...bank.report,
+      extracted: questions.length,
+      usableMultipleChoice: usableQuestions.length,
+      invalidCount: issueQuestions.length,
+      missingIds: Array.from({ length: maxSourceId }, (_, index) => index + 1).filter(
+        (id) => !ids.has(id),
+      ),
+      missingAnswers: questions
+        .filter(
+          (question) =>
+            getQuestionAnswerKeys(question).length === 0,
+        )
+        .map((question) => question.id),
+      issueIds: issueQuestions.map((question) => question.id),
+    },
+  };
 }
 
 export const useStore = create<AppState>()(
@@ -61,6 +97,47 @@ export const useStore = create<AppState>()(
       activeBankId: 'default-mln111',
       soundEnabled: true,
       
+      addQuestion: (bankId, question) =>
+        set((state) => {
+          const bank = state.banks.find((b) => b.id === bankId);
+          if (!bank) return state;
+          const newId = bank.questions.length > 0 ? Math.max(...bank.questions.map(q => q.id)) + 1 : 1;
+          const newQuestion: Question = {
+            ...normalizeQuestionAnswers(question),
+            id: newId,
+          };
+          return {
+            banks: state.banks.map((b) =>
+              b.id === bankId
+                ? updateBankQuestions(b, [...b.questions, newQuestion])
+                : b
+            ),
+          };
+        }),
+      updateQuestion: (bankId, questionId, updatedData) =>
+        set((state) => ({
+          banks: state.banks.map((b) => {
+            if (b.id !== bankId) return b;
+            const normalizedQuestion: Question = {
+              ...normalizeQuestionAnswers(updatedData),
+              id: questionId,
+            };
+            return updateBankQuestions(
+              b,
+              b.questions.map((q) => q.id === questionId ? normalizedQuestion : q),
+            );
+          }),
+        })),
+      deleteQuestion: (bankId, questionId) =>
+        set((state) => ({
+          banks: state.banks.map((b) => {
+            if (b.id !== bankId) return b;
+            return updateBankQuestions(
+              b,
+              b.questions.filter((q) => q.id !== questionId),
+            );
+          }),
+        })),
       toggleSound: () => set((state) => ({ soundEnabled: !state.soundEnabled })),
       
       addBank: (name, questions, details) => {
@@ -105,13 +182,7 @@ export const useStore = create<AppState>()(
         const state = get();
         const activeBank = state.banks.find(b => b.id === state.activeBankId);
         return activeBank
-          ? activeBank.questions.filter(
-              (question) =>
-                Array.isArray(question.options) &&
-                question.options.length >= 2 &&
-                Array.isArray(question.answerKeys) &&
-                question.answerKeys.length > 0,
-            )
+          ? activeBank.questions.filter((question) => isUsableQuestion(question))
           : [];
       }
     }),

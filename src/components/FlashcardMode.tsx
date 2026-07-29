@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useActiveQuestions } from '../hooks/useActiveQuestions';
 import { Flashcard3D } from './Flashcard3D';
 import { StudySetup, type StudySettings } from './StudySetup';
@@ -28,6 +28,29 @@ export function FlashcardMode() {
     }
     return q;
   }, [activeQuestions, settings]);
+
+  const handlePrev = () => {
+    setFlashIndex((prev) => Math.max(0, prev - 1));
+  };
+
+  const handleNext = () => {
+    setFlashIndex((prev) => Math.min(sessionQuestions.length - 1, prev + 1));
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        handlePrev();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        handleNext();
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [sessionQuestions.length]);
 
   if (activeQuestions.length === 0) {
     return (
@@ -64,14 +87,6 @@ export function FlashcardMode() {
 
   const activeQuestion = sessionQuestions[flashIndex];
 
-  const handlePrev = () => {
-    setFlashIndex((prev) => Math.max(0, prev - 1));
-  };
-
-  const handleNext = () => {
-    setFlashIndex((prev) => Math.min(sessionQuestions.length - 1, prev + 1));
-  };
-
   const isFinished = flashIndex === sessionQuestions.length - 1;
 
   return (
@@ -103,9 +118,9 @@ export function FlashcardMode() {
         <button 
           onClick={handlePrev}
           disabled={flashIndex === 0}
-          className="px-6 py-3 rounded-xl font-medium bg-surface border border-border hover:bg-surface-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          className="px-6 py-3 rounded-xl font-medium bg-surface border border-border hover:bg-surface-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
         >
-          Câu trước
+          Câu trước <span className="text-text-muted text-sm font-normal">(←)</span>
         </button>
         {isFinished ? (
           <button 
@@ -117,9 +132,9 @@ export function FlashcardMode() {
         ) : (
           <button 
             onClick={handleNext}
-            className="px-6 py-3 rounded-xl font-medium bg-primary text-white hover:bg-primary-hover transition-all shadow-lg shadow-primary/25"
+            className="px-6 py-3 rounded-xl font-medium bg-primary text-white hover:bg-primary-hover transition-all shadow-lg shadow-primary/25 flex items-center gap-2"
           >
-            Câu tiếp
+            Câu tiếp <span className="text-primary-foreground/70 text-sm font-normal">(→)</span>
           </button>
         )}
       </div>

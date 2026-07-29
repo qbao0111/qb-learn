@@ -1,14 +1,19 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { playSound } from '../lib/sound';
+import { getQuestionAnswerKeys } from '../lib/answer-utils';
+import { QuestionImage } from './QuestionImage';
 
 export interface Question {
   id: number;
   question: string;
   options: { key: string; text: string }[];
   answer: string;
+  answerKey?: string;
+  answerKeys?: string[];
   explanation?: string;
   metadata?: string;
+  imageDataUrl?: string;
 }
 
 interface Flashcard3DProps {
@@ -55,7 +60,29 @@ export function Flashcard3D({ question, index }: Flashcard3DProps) {
     setIsFlipped(false);
   }, [question]);
 
-  const correctAnswerText = question.options.find(o => o.key === question.answer)?.text || question.answer;
+  // Handle spacebar to flip
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        setIsFlipped(prev => {
+          if (!prev) playSound('flip');
+          return !prev;
+        });
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const answerKeys = getQuestionAnswerKeys(question);
+  const correctAnswerText = answerKeys
+    .map((key) => {
+      const text = question.options.find((option) => option.key === key)?.text;
+      return text ? `${key}. ${text}` : key;
+    })
+    .join(' · ');
 
   return (
     <div className="w-full flex justify-center perspective-1200 py-8">
@@ -105,6 +132,11 @@ export function Flashcard3D({ question, index }: Flashcard3DProps) {
             <h3 className="text-2xl font-bold text-center text-text leading-relaxed max-w-2xl mb-8">
               {question.question}
             </h3>
+            {question.imageDataUrl && (
+              <div className="mb-6">
+                <QuestionImage src={question.imageDataUrl} compact />
+              </div>
+            )}
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-3xl">
               {question.options.map((opt, i) => (
                 <li key={i} className="bg-surface-2 p-4 rounded-xl text-center text-sm md:text-base border border-transparent">
@@ -130,7 +162,7 @@ export function Flashcard3D({ question, index }: Flashcard3DProps) {
               Đáp án đúng
             </div>
             <h3 className="text-2xl font-bold text-center text-green-700 leading-relaxed max-w-2xl mb-4">
-              {question.answer}. {correctAnswerText}
+              {correctAnswerText}
             </h3>
             <p className="text-text-muted text-center max-w-xl">
               {question.explanation ? `Gợi ý: ${question.explanation}` : "Hãy ghi nhớ đáp án đúng nhé."}

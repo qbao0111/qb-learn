@@ -3,6 +3,8 @@ import type { Question } from '../store';
 import { useActiveQuestions } from '../hooks/useActiveQuestions';
 import { CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { playSound } from '../lib/sound';
+import { areAnswerSetsEqual, getQuestionAnswerKeys } from '../lib/answer-utils';
+import { QuestionImage } from './QuestionImage';
 
 export function ExamMode() {
   const activeQuestions = useActiveQuestions();
@@ -11,7 +13,7 @@ export function ExamMode() {
   const [numQuestions, setNumQuestions] = useState(20);
   
   const [examQuestions, setExamQuestions] = useState<Question[]>([]);
-  const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [answers, setAnswers] = useState<Record<number, string[]>>({});
   
   // Timer state
   const [timeLimit, setTimeLimit] = useState(30); // minutes
@@ -61,9 +63,8 @@ export function ExamMode() {
   const calculateScore = () => {
     let correct = 0;
     examQuestions.forEach(q => {
-      const selected = answers[q.id];
-      if (!selected) return;
-      if (q.answer === selected || (q.answerKeys && q.answerKeys.includes(selected))) {
+      const selected = answers[q.id] ?? [];
+      if (areAnswerSetsEqual(selected, getQuestionAnswerKeys(q))) {
         correct++;
       }
     });
@@ -162,9 +163,15 @@ export function ExamMode() {
         <div className="space-y-6">
           <h3 className="text-xl font-bold">Chi tiết đáp án</h3>
           {examQuestions.map((q, idx) => {
-            const selected = answers[q.id];
-            const isCorrect = q.answer === selected || (q.answerKeys && q.answerKeys.includes(selected));
-            const correctAnswerText = q.options.find(o => o.key === q.answer)?.text || q.answer;
+            const selected = answers[q.id] ?? [];
+            const correctKeys = getQuestionAnswerKeys(q);
+            const isCorrect = areAnswerSetsEqual(selected, correctKeys);
+            const correctAnswerText = correctKeys
+              .map((key) => {
+                const text = q.options.find((option) => option.key === key)?.text;
+                return text ? `${key}. ${text}` : key;
+              })
+              .join(' · ');
             
             return (
               <div key={q.id} className={`bg-surface border rounded-2xl p-6 ${isCorrect ? 'border-green-200 bg-green-50/30' : 'border-red-200 bg-red-50/30'}`}>
@@ -175,10 +182,15 @@ export function ExamMode() {
                   <div className="flex-1">
                     <p className="font-bold mb-4">Câu {idx + 1}: {q.question}</p>
                     
+                    {q.imageDataUrl && (
+                      <div className="mb-4">
+                        <QuestionImage src={q.imageDataUrl} compact />
+                      </div>
+                    )}
                     <div className="space-y-2 mb-4">
                       {q.options.map(opt => {
-                        const isThisSelected = selected === opt.key;
-                        const isThisCorrect = q.answer === opt.key || (q.answerKeys && q.answerKeys.includes(opt.key));
+                        const isThisSelected = selected.includes(opt.key);
+                        const isThisCorrect = correctKeys.includes(opt.key);
                         
                         let optClass = "p-3 rounded-lg border text-sm ";
                         if (isThisCorrect) {
@@ -199,7 +211,7 @@ export function ExamMode() {
                     
                     {!isCorrect && (
                       <div className="bg-white p-3 rounded-lg border border-border text-sm">
-                        <span className="font-semibold text-text-muted">Đáp án đúng:</span> {q.answer}. {correctAnswerText}
+                        <span className="font-semibold text-text-muted">Đáp án đúng:</span> {correctAnswerText}
                       </div>
                     )}
                   </div>
@@ -215,7 +227,7 @@ export function ExamMode() {
   // Running state
   const m = Math.floor(timeLeft / 60);
   const s = timeLeft % 60;
-  const answeredCount = Object.keys(answers).length;
+  const answeredCount = Object.values(answers).filter((keys) => keys.length > 0).length;
 
   return (
     <div className="w-full max-w-3xl mx-auto relative pb-24">
@@ -240,25 +252,49 @@ export function ExamMode() {
       
       {/* Questions List */}
       <div className="space-y-8">
-        {examQuestions.map((q, idx) => (
+        {examQuestions.map((q, idx) => {
+          const correctKeys = getQuestionAnswerKeys(q);
+          const isMultiple = correctKeys.length > 1;
+          const selectedKeys = answers[q.id] ?? [];
+
+          return (
           <div key={q.id} className="bg-surface border border-border rounded-2xl p-8 shadow-sm">
             <h3 className="text-xl font-bold text-text mb-6">
               Câu {idx + 1}: <span className="font-normal">{q.question}</span>
             </h3>
+            {q.imageDataUrl && (
+              <div className="mb-6">
+                <QuestionImage src={q.imageDataUrl} />
+              </div>
+            )}
+            {isMultiple && (
+              <p className="mb-4 inline-flex rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">
+                Chọn {correctKeys.length} đáp án
+              </p>
+            )}
             <div className="space-y-3">
               {q.options.map((opt) => {
-                const isSelected = answers[q.id] === opt.key;
+                const isSelected = selectedKeys.includes(opt.key);
                 return (
                   <label 
                     key={opt.key}
                     className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-colors ${isSelected ? 'border-primary bg-primary/5' : 'border-border hover:bg-surface-2'}`}
                   >
                     <input 
-                      type="radio" 
+                      type={isMultiple ? 'checkbox' : 'radio'}
                       name={`q-${q.id}`} 
                       value={opt.key}
                       checked={isSelected}
-                      onChange={() => setAnswers(prev => ({ ...prev, [q.id]: opt.key }))}
+                      onChange={() => setAnswers((previous) => {
+                        if (!isMultiple) {
+                          return { ...previous, [q.id]: [opt.key] };
+                        }
+                        const current = previous[q.id] ?? [];
+                        const next = current.includes(opt.key)
+                          ? current.filter((key) => key !== opt.key)
+                          : [...current, opt.key];
+                        return { ...previous, [q.id]: next };
+                      })}
                       className="w-5 h-5 text-primary focus:ring-primary"
                     />
                     <div className="flex-1 text-base">
@@ -270,7 +306,8 @@ export function ExamMode() {
               })}
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
