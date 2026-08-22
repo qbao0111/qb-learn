@@ -102,6 +102,7 @@ test('restores old import behavior: deduplicate and report usable questions', ()
   assert.equal(prepared.questions.length, 1);
   assert.equal(prepared.report.extracted, 2);
   assert.equal(prepared.report.usableMultipleChoice, 1);
+  assert.equal(prepared.report.duplicatesDetected, 1);
   assert.equal(prepared.report.duplicatesRemoved, 1);
   assert.equal(suggestBankName('4343982f-9c95-4611-b59d-ec69eec737ae.pdf'), 'Bộ đề chưa đặt tên');
 });
@@ -208,4 +209,104 @@ test('does not mistake a class name after a colon for compact answer keys', () =
   assert.match(questions[0].question, /MonoBehaviour/);
   assert.equal(questions[0].options.length, 4);
   assert.deepEqual(questions[0].answerKeys, ['C']);
+});
+
+test('parses Quizlet flashcard-print tables without question numbers', () => {
+  const questions = parseQuizletRows([
+    {
+      page: 1,
+      y: 765,
+      parts: [
+        { x: 118, text: 'Công nghiệp hoá ở Anh bắt nguồn từ ngành nào? A. Công nghiệp nhẹ' },
+        { x: 385, text: 'A' },
+      ],
+    },
+    { page: 1, y: 743, parts: [{ x: 118, text: 'B. Công nghiệp nặng C. Dịch vụ D. Sản xuất vũ khí' }] },
+    {
+      page: 1,
+      y: 632,
+      parts: [
+        { x: 118, text: 'Kinh tế thị trường phải được điều tiết bởi yếu tố nào? A. Nhà nước' },
+        { x: 385, text: 'AC' },
+      ],
+    },
+    { page: 1, y: 610, parts: [{ x: 118, text: 'B. Pháp luật C. Quy luật giá trị D. Kinh tế thế giới' }] },
+  ]);
+
+  assert.equal(questions.length, 2);
+  assert.equal(questions[0].question, 'Công nghiệp hoá ở Anh bắt nguồn từ ngành nào?');
+  assert.deepEqual(questions[0].options.map((option) => option.key), ['A', 'B', 'C', 'D']);
+  assert.deepEqual(questions[0].answerKeys, ['A']);
+  assert.deepEqual(questions[1].answerKeys, ['A', 'C']);
+});
+
+test('does not confuse numbered Quizlet rows with the flashcard table layout', () => {
+  const questions = parseQuizletRows([
+    { page: 1, parts: [{ x: 15, text: '1. First numbered question?' }] },
+    { page: 1, parts: [{ x: 15, text: 'A. One' }] },
+    { page: 1, parts: [{ x: 15, text: 'B. Two' }] },
+    { page: 1, parts: [{ x: 15, text: 'C. Three' }] },
+    { page: 1, parts: [{ x: 15, text: 'D. Four' }, { x: 430, text: 'B' }] },
+    { page: 1, parts: [{ x: 15, text: '2. Second numbered question?' }] },
+    { page: 1, parts: [{ x: 15, text: 'A. Alpha' }] },
+    { page: 1, parts: [{ x: 15, text: 'B. Beta' }] },
+    { page: 1, parts: [{ x: 15, text: 'C. Gamma' }] },
+    { page: 1, parts: [{ x: 15, text: 'D. Delta' }, { x: 430, text: 'C' }] },
+  ]);
+
+  assert.equal(questions.length, 2);
+  assert.equal(questions[0].question, 'First numbered question?');
+  assert.deepEqual(questions[0].answerKeys, ['B']);
+  assert.equal(questions[1].question, 'Second numbered question?');
+  assert.deepEqual(questions[1].answerKeys, ['C']);
+});
+
+test('keeps duplicate source rows when full-fidelity import is selected', () => {
+  const duplicate = {
+    id: 1,
+    question: 'Keep this repeated Quizlet card?',
+    options: [
+      { key: 'A', text: 'Yes' },
+      { key: 'B', text: 'No' },
+    ],
+    answer: 'A',
+    answerKeys: ['A'],
+  };
+  const prepared = prepareImportedQuestions(
+    [duplicate, { ...duplicate, id: 2 }],
+    { removeDuplicates: false },
+  );
+
+  assert.equal(prepared.questions.length, 2);
+  assert.equal(prepared.report.duplicatesDetected, 1);
+  assert.equal(prepared.report.duplicatesRemoved, 0);
+  assert.equal(prepared.report.usableMultipleChoice, 2);
+});
+
+test('reads a repeated answer text from the right side of a Quizlet table', () => {
+  const questions = parseQuizletRows([
+    {
+      page: 1,
+      parts: [
+        { x: 118, text: "Công thức chung của tư bản là gì? A. T-H-T' B. T-H-T C. H-T-H D. T-H-H-T" },
+        { x: 385, text: "A. T-H-T'" },
+      ],
+    },
+    {
+      page: 1,
+      parts: [
+        { x: 118, text: 'Các nhân tố ảnh hưởng tới lượng giá trị hàng hóa: A. Năng suất; lao động phức tạp B. Năng suất; lao động giản đơn C. Lao động giản đơn; lao động phức tạp Năng suất lao động; cường độ lao động' },
+        { x: 385, text: 'D' },
+      ],
+    },
+  ]);
+
+  assert.equal(questions.length, 2);
+  assert.deepEqual(questions[0].answerKeys, ['A']);
+  assert.equal(questions[1].options[2].text, 'Lao động giản đơn; lao động phức tạp');
+  assert.deepEqual(questions[1].options[3], {
+    key: 'D',
+    text: 'Năng suất lao động; cường độ lao động',
+  });
+  assert.deepEqual(questions[1].answerKeys, ['D']);
 });

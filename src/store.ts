@@ -19,6 +19,7 @@ export interface Question {
 export interface BankReport {
   extracted: number;
   usableMultipleChoice: number;
+  duplicatesDetected: number;
   duplicatesRemoved: number;
   invalidCount: number;
   missingIds: number[];

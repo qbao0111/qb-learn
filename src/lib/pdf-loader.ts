@@ -29,6 +29,7 @@ export async function parseQuizletPdf(
       const page = await doc.getPage(pageNo);
       const content = await page.getTextContent();
       const rows: any[] = [];
+      const pageHeight = page.view[3] - page.view[1];
 
       for (const item of content.items) {
         if (!('transform' in item)) continue;
@@ -36,7 +37,7 @@ export async function parseQuizletPdf(
         const [, , , , x, y] = item.transform;
         // Exported QB/Quizlet PDFs may place the first question near y=782.
         // Only discard the actual running header/footer, not the top question.
-        if (!isPdfContentItem(y, cleanText((item as any).str))) continue;
+        if (!isPdfContentItem(y, cleanText((item as any).str), pageHeight)) continue;
         
         let row = rows.find((candidate) => Math.abs(candidate.y - y) < 3);
         if (!row) {
@@ -47,7 +48,6 @@ export async function parseQuizletPdf(
       }
 
       rows.sort((a, b) => b.y - a.y);
-      const pageHeight = page.view[3] - page.view[1];
       for (const row of rows) {
         const line = cleanText(
           [...row.parts]
@@ -66,7 +66,13 @@ export async function parseQuizletPdf(
       }
 
       allRows.push(...rows);
-      embeddedImages.push(...await extractPdfPageImages(page, pageNo));
+      try {
+        embeddedImages.push(...await extractPdfPageImages(page, pageNo));
+      } catch (error) {
+        // Images are optional. A delayed/corrupt PDF image should not block
+        // creation of an otherwise valid text question bank.
+        console.warn(`Could not import images from PDF page ${pageNo}.`, error);
+      }
     }
 
     const questions = parseQuizletRows(allRows);

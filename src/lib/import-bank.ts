@@ -4,6 +4,7 @@ import { getQuestionAnswerKeys } from './answer-utils.ts';
 export interface ImportReport {
   extracted: number;
   usableMultipleChoice: number;
+  duplicatesDetected: number;
   duplicatesRemoved: number;
   invalidCount: number;
   missingIds: number[];
@@ -14,6 +15,10 @@ export interface ImportReport {
 export interface PreparedImport {
   questions: Question[];
   report: ImportReport;
+}
+
+export interface PrepareImportOptions {
+  removeDuplicates?: boolean;
 }
 
 export function normalizeQuestionAnswers(
@@ -52,19 +57,28 @@ export function suggestBankName(fileName: string) {
     : 'Bộ đề chưa đặt tên';
 }
 
-export function prepareImportedQuestions(parsedQuestions: Question[]): PreparedImport {
+export function prepareImportedQuestions(
+  parsedQuestions: Question[],
+  options: PrepareImportOptions = { removeDuplicates: true },
+): PreparedImport {
   const seen = new Set<string>();
   const questions: Question[] = [];
+  let duplicatesDetected = 0;
   let duplicatesRemoved = 0;
 
   for (const question of parsedQuestions) {
     const normalizedQuestion = question.question.replace(/\s+/g, ' ').trim().toLowerCase();
-    if (!normalizedQuestion || seen.has(normalizedQuestion)) {
-      duplicatesRemoved += 1;
-      continue;
+    if (!normalizedQuestion) continue;
+    if (seen.has(normalizedQuestion)) {
+      duplicatesDetected += 1;
+      if (options.removeDuplicates !== false) {
+        duplicatesRemoved += 1;
+        continue;
+      }
+    } else {
+      seen.add(normalizedQuestion);
     }
 
-    seen.add(normalizedQuestion);
     questions.push(question);
   }
 
@@ -78,6 +92,7 @@ export function prepareImportedQuestions(parsedQuestions: Question[]): PreparedI
     report: {
       extracted: parsedQuestions.length,
       usableMultipleChoice,
+      duplicatesDetected,
       duplicatesRemoved,
       invalidCount: issueQuestions.length,
       missingIds: Array.from({ length: maxSourceId }, (_, index) => index + 1).filter(

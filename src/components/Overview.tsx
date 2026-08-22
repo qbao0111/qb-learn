@@ -24,6 +24,7 @@ export function Overview() {
   const [statusType, setStatusType] = useState<'idle' | 'selected' | 'success' | 'error'>('idle');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [bankName, setBankName] = useState('');
+  const [removeDuplicates, setRemoveDuplicates] = useState(false);
   const [exportingBankId, setExportingBankId] = useState<string | null>(null);
   const [exportError, setExportError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -64,7 +65,7 @@ export function Overview() {
         setStatus(`Đang đọc PDF: trang ${page}/${total}...`);
       });
 
-      const { questions, report } = prepareImportedQuestions(parsedQuestions);
+      const { questions, report } = prepareImportedQuestions(parsedQuestions, { removeDuplicates });
       if (!report.usableMultipleChoice) {
         throw new Error('Không tìm thấy câu hỏi trắc nghiệm có đáp án hợp lệ trong PDF này.');
       }
@@ -78,6 +79,9 @@ export function Overview() {
       const filteredDetails = [
         report.duplicatesRemoved
           ? `đã lọc ${report.duplicatesRemoved} câu trùng`
+          : '',
+        !report.duplicatesRemoved && report.duplicatesDetected
+          ? `giữ nguyên ${report.duplicatesDetected} câu cùng nội dung`
           : '',
         report.invalidCount
           ? `${report.invalidCount} câu thiếu dữ liệu không dùng để học`
@@ -186,6 +190,20 @@ export function Overview() {
             >
               {isLoading ? 'Đang tạo...' : 'Tạo bộ đề từ PDF'}
             </button>
+            <label className="flex items-start gap-3 rounded-xl border border-border bg-surface-2 px-4 py-3 text-sm sm:col-span-2">
+              <input
+                type="checkbox"
+                checked={removeDuplicates}
+                onChange={(event) => setRemoveDuplicates(event.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              />
+              <span>
+                <span className="block font-semibold text-text">Lọc câu hỏi có cùng nội dung</span>
+                <span className="text-text-muted">
+                  Để trống để giữ nguyên đủ số thẻ như trên Quizlet, kể cả các câu lặp lại.
+                </span>
+              </span>
+            </label>
             <div className="flex min-w-0 items-center gap-2 text-sm text-text-muted sm:col-span-2">
               <FileText size={16} className="shrink-0 text-primary" />
               <span className="truncate">{selectedFile.name}</span>
@@ -206,6 +224,8 @@ export function Overview() {
 
         {status && (
           <div
+            role={statusType === 'error' ? 'alert' : 'status'}
+            aria-live={statusType === 'error' ? 'assertive' : 'polite'}
             className={`mt-4 rounded-xl p-4 text-sm font-medium ${
               statusType === 'error'
                 ? 'bg-red-100 text-red-700'

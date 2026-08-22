@@ -9,6 +9,13 @@ type PdfRawImage = {
   bitmap?: ImageBitmap;
 };
 
+type PdfObjectStore = {
+  get: (
+    objectName: string,
+    callback?: (value: unknown) => void,
+  ) => unknown;
+};
+
 export interface PdfQuestionStart {
   id: number;
   page: number;
@@ -26,6 +33,36 @@ export interface PdfEmbeddedImage {
 const pdfjs = (
   pdfjsLib as unknown as { default?: typeof pdfjsLib }
 ).default ?? pdfjsLib;
+
+export function waitForPdfObject(
+  store: PdfObjectStore,
+  objectName: string,
+  timeoutMs = 8_000,
+): Promise<unknown | undefined> {
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (value: unknown | undefined) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      resolve(value);
+    };
+    const timeout = setTimeout(() => finish(undefined), timeoutMs);
+
+    try {
+      // Passing a callback is important: PDF.js throws when get(name) is
+      // called before an image dependency has finished resolving.
+      const immediateValue = store.get(objectName, finish);
+      if (immediateValue !== undefined && immediateValue !== null) {
+        finish(immediateValue);
+      }
+    } catch {
+      // An optional illustration must never prevent the text questions from
+      // being imported. A missing/corrupt image is skipped after this point.
+      finish(undefined);
+    }
+  });
+}
 
 function transformPoint(
   matrix: number[],
@@ -60,10 +97,22 @@ export function getImagePlacement(
   const top = matrix[3] < 0 ? minY : pageHeight - maxY;
 
   return {
+    left: minX,
     top,
     width: maxX - minX,
     height: maxY - minY,
   };
+}
+
+export function isLikelyPdfHeaderImage(
+  placement: ReturnType<typeof getImagePlacement>,
+) {
+  return (
+    placement.top < 60
+    && placement.left < 80
+    && placement.width <= 80
+    && placement.height <= 80
+  );
 }
 
 export function findQuestionIdForImage(
@@ -183,11 +232,9 @@ export async function extractPdfPageImages(
     if (!matrix) continue;
 
     const placement = getImagePlacement(matrix, pageHeight);
-    const objectName = operatorList.argsArray[index]?.[0];
-    if (typeof objectName !== 'string') continue;
-
-    const rawImage = page.objs.get(objectName) as PdfRawImage | undefined;
-    if (!rawImage || rawImage.width < 40 || rawImage.height < 40) continue;
+    // Quizlet exports draw their logo as an image in this corner on every
+    // page. It is not question content and may still be unresolved here.
+    if (isLikelyPdfHeaderImage(placement)) continue;
     if (
       placement.width < 32
       || placement.height < 32
@@ -195,6 +242,15 @@ export async function extractPdfPageImages(
     ) {
       continue;
     }
+
+    const objectName = operatorList.argsArray[index]?.[0];
+    if (typeof objectName !== 'string') continue;
+
+    const rawImage = await waitForPdfObject(
+      page.objs as unknown as PdfObjectStore,
+      objectName,
+    ) as PdfRawImage | undefined;
+    if (!rawImage || rawImage.width < 40 || rawImage.height < 40) continue;
 
     const dataUrl = rawImageToDataUrl(rawImage);
     if (!dataUrl) continue;

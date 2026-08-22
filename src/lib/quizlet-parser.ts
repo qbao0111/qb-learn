@@ -65,7 +65,119 @@ export function parseAnswerKeys(answer: string) {
   return [...new Set(answerKeys)];
 }
 
+function parseTableAnswer(value: string) {
+  return cleanText(value).match(/^([A-Z]{1,26})(?:\.|\s|$)/)?.[1] || '';
+}
+
+function parseInlineOptions(value: string) {
+  const text = cleanText(value);
+  const markerPattern = /(?:^|\s)([A-Z])\.\s*/g;
+  const markers: Array<{ key: string; start: number; contentStart: number }> = [];
+  let match: RegExpExecArray | null;
+
+  while ((match = markerPattern.exec(text))) {
+    const key = match[1].toUpperCase();
+    const markerStart = match.index + (match[0].startsWith(' ') ? 1 : 0);
+    const contentStart = match.index + match[0].length;
+
+    if (!markers.length) {
+      if (key === 'A') markers.push({ key, start: markerStart, contentStart });
+      continue;
+    }
+
+    const expectedKey = String.fromCharCode(markers.at(-1)!.key.charCodeAt(0) + 1);
+    if (key === expectedKey) markers.push({ key, start: markerStart, contentStart });
+  }
+
+  if (markers.length < 2) return null;
+
+  const question = cleanText(text.slice(0, markers[0].start));
+  const options = markers.map((marker, index) => ({
+    key: marker.key,
+    text: cleanText(text.slice(marker.contentStart, markers[index + 1]?.start ?? text.length)),
+  }));
+
+  if (!question || options.some((option) => !option.text)) return null;
+  return { question, options };
+}
+
+function parseQuizletFlashcardTable(allRows: any[]) {
+  const cards: Array<{ text: string; answer: string }> = [];
+  let current: { page: number; lines: string[]; answer: string } | null = null;
+
+  const pushCurrent = () => {
+    if (!current) return;
+    const text = cleanText(current.lines.join(' '));
+    if (text) cards.push({ text, answer: current.answer });
+  };
+
+  for (const row of allRows) {
+    const parts = [...row.parts].sort((a, b) => a.x - b.x);
+    const answerPart = parts.find(
+      (part: any) => part.x >= 360 && part.x <= 520 && parseTableAnswer(part.text),
+    );
+    const leftLine = joinLine(
+      answerPart
+        ? parts.filter((part: any) => part !== answerPart && part.x < answerPart.x - 20)
+        : parts.filter((part: any) => part.x < 360),
+    );
+
+    // In the numbered Quizlet layout, a far-right key can share the final
+    // option row (for example "D. Last option   B"). That is not a table-card
+    // boundary; table cards put the question's first line beside the key.
+    if (answerPart && leftLine && !/^\W*[A-Z]\.\s/.test(leftLine)) {
+      pushCurrent();
+      current = {
+        page: row.page,
+        lines: [leftLine],
+        answer: parseTableAnswer(answerPart.text),
+      };
+      continue;
+    }
+
+    if (current && row.page === current.page && leftLine) current.lines.push(leftLine);
+  }
+  pushCurrent();
+
+  return cards.flatMap((card) => {
+    const parsed = parseInlineOptions(card.text);
+    if (!parsed) return [];
+    const parsedAnswerKeys = parseAnswerKeys(card.answer);
+    const lastOption = parsed.options.at(-1);
+    const missingNextAnswerKey = parsedAnswerKeys.find(
+      (key) => lastOption && key.charCodeAt(0) === lastOption.key.charCodeAt(0) + 1,
+    );
+
+    // Some Quizlet sets omit the final option marker in the visible source.
+    // Recover a missing correct option when the final text clearly contains
+    // two semicolon-delimited choices, e.g. "C. X; Y D. Z; W" with "D."
+    // absent from the exported PDF text.
+    if (lastOption && missingNextAnswerKey) {
+      const split = lastOption.text.match(/^(.+?;\s+.+?)\s+(\p{Lu}[^;]+;\s+.+)$/u);
+      if (split) {
+        lastOption.text = cleanText(split[1]);
+        parsed.options.push({ key: missingNextAnswerKey, text: cleanText(split[2]) });
+      }
+    }
+
+    const validKeys = new Set(parsed.options.map((option) => option.key));
+    const answerKeys = parsedAnswerKeys.filter((key) => validKeys.has(key));
+    return [{
+      id: 0,
+      question: parsed.question,
+      options: parsed.options,
+      answer: answerKeys[0] || card.answer,
+      answerKey: answerKeys[0] || '',
+      answerKeys,
+      explanation: '',
+    }];
+  }).map((question, index) => ({ ...question, id: index + 1 }));
+}
+
 export function parseQuizletRows(allRows: any[]) {
+  const tableQuestions = parseQuizletFlashcardTable(allRows);
+  if (tableQuestions.length >= 2) return tableQuestions;
+
   const answerByNumber = new Map<number, string>();
   const supplementByNumber = new Map<number, string[]>();
   const leftLines: string[] = [];
