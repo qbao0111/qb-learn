@@ -1,5 +1,6 @@
 import type { Question } from '../store';
 import { getQuestionAnswerKeys } from './answer-utils.ts';
+import { restoreVietnamesePdfDiacritics } from './text-normalization.ts';
 
 export interface ImportReport {
   extracted: number;
@@ -29,6 +30,17 @@ export function normalizeQuestionAnswers(
 
   return {
     ...question,
+    question: restoreVietnamesePdfDiacritics(question.question),
+    options: question.options.map((option) => ({
+      ...option,
+      text: restoreVietnamesePdfDiacritics(option.text),
+    })),
+    explanation: question.explanation
+      ? restoreVietnamesePdfDiacritics(question.explanation)
+      : question.explanation,
+    metadata: question.metadata
+      ? restoreVietnamesePdfDiacritics(question.metadata)
+      : question.metadata,
     answer: primaryAnswer,
     answerKey: primaryAnswer,
     answerKeys,

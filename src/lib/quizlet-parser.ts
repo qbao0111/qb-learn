@@ -1,5 +1,7 @@
+import { restoreVietnamesePdfDiacritics } from './text-normalization.ts';
+
 export const cleanText = (value = "") =>
-  String(value)
+  restoreVietnamesePdfDiacritics(value)
     // PDF.js 3 emits question numbers as separate items ("1", ".", "Question").
     // Normalize spaces before punctuation so both old and new PDF.js output parse alike.
     .replace(/\s+([.,:;?!])/g, "$1")
@@ -23,7 +25,10 @@ export function splitInlineAnswer(parts: any[]) {
   // continue with an explanation on the following rows:
   // "D. Wrong option: B. Correct option text"
   const answerWithText = fullText.match(/^(.*):\s*([A-Z])\.\s*(.+)$/i);
-  if (answerWithText) {
+  // A colon can also introduce the first choice on a wrapped question row
+  // ("... gồm: A. ..."). Only interpret it as a repeated answer when the
+  // content before the colon already contains at least one choice marker.
+  if (answerWithText && /(?:^|\s)[A-Z]\.\s*/i.test(answerWithText[1])) {
     return {
       line: answerWithText[1].trim(),
       answer: answerWithText[2].toUpperCase(),
@@ -175,8 +180,13 @@ function parseQuizletFlashcardTable(allRows: any[]) {
 }
 
 export function parseQuizletRows(allRows: any[]) {
-  const tableQuestions = parseQuizletFlashcardTable(allRows);
-  if (tableQuestions.length >= 2) return tableQuestions;
+  const numberedQuestionRows = allRows.filter(
+    (row) => /^\W*\d+\.\s*/.test(joinLine(row.parts)),
+  ).length;
+  if (numberedQuestionRows < 2) {
+    const tableQuestions = parseQuizletFlashcardTable(allRows);
+    if (tableQuestions.length >= 2) return tableQuestions;
+  }
 
   const answerByNumber = new Map<number, string>();
   const supplementByNumber = new Map<number, string[]>();
@@ -201,7 +211,20 @@ export function parseQuizletRows(allRows: any[]) {
     if (questionStart) {
       pendingAnswerNumber = Number(questionStart[1]);
       pendingSupplementNumber = null;
-      leftLines.push(fullLine);
+      const finalColonIndex = fullLine.lastIndexOf(':');
+      const hasOptionsBeforeFinalColon = finalColonIndex >= 0
+        && /\sA\.\s*/.test(fullLine.slice(0, finalColonIndex));
+      const numberedInlineAnswer = hasOptionsBeforeFinalColon
+        ? splitInlineAnswer(row.parts)
+        : null;
+      if (numberedInlineAnswer) {
+        answerByNumber.set(pendingAnswerNumber, numberedInlineAnswer.answer);
+        pendingSupplementNumber = pendingAnswerNumber;
+        appendSupplement(pendingAnswerNumber, numberedInlineAnswer.supplement);
+        leftLines.push(numberedInlineAnswer.line);
+      } else {
+        leftLines.push(fullLine);
+      }
       continue;
     }
 
@@ -278,6 +301,23 @@ export function parseQuizletRows(allRows: any[]) {
   const pushCurrent = () => {
     if (!current) return;
     current.question = cleanText(current.question);
+    const inlineSource = cleanText([
+      current.question,
+      ...current.options.map((option: any) => `${option.key}. ${option.text}`),
+    ].join(' '));
+    if (
+      !current.options.length
+      || /\sA\.\s*/.test(current.question)
+      || current.options.some(
+        (option: any) => option.key === 'A' && /\sB\.\s*/.test(option.text),
+      )
+    ) {
+      const inline = parseInlineOptions(inlineSource);
+      if (inline) {
+        current.question = inline.question;
+        current.options = inline.options;
+      }
+    }
     current.options = current.options.map((option: any) => ({
       key: option.key,
       text: cleanText(option.text),

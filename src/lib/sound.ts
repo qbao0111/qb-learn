@@ -7,14 +7,13 @@ function getAudioContext() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
   }
-  // Resume if suspended (e.g. by browser policy before first interaction)
   if (audioCtx.state === 'suspended') {
     audioCtx.resume();
   }
   return audioCtx;
 }
 
-export function playSound(type: 'correct' | 'incorrect' | 'flip' | 'complete') {
+export function playSound(type: 'correct' | 'incorrect' | 'flip' | 'complete' | 'select' | 'star' | 'toggle') {
   const { soundEnabled } = useStore.getState();
   if (!soundEnabled) return;
 
@@ -33,113 +32,148 @@ export function playSound(type: 'correct' | 'incorrect' | 'flip' | 'complete') {
     case 'complete':
       playComplete(ctx);
       break;
+    case 'select':
+      playSelect(ctx);
+      break;
+    case 'star':
+      playStar(ctx);
+      break;
+    case 'toggle':
+      playToggle(ctx);
+      break;
   }
 }
 
 // ----------------------------------------------------
-// Sound Synthesizers
+// Web Audio Procedural Sound Synthesizers
 // ----------------------------------------------------
 
-function playCorrect(ctx: AudioContext) {
-  const t = ctx.currentTime;
-  
-  // High "ting" sound
+function playSelect(ctx: AudioContext) {
+  const now = ctx.currentTime;
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
-  
   osc.type = 'sine';
-  osc.frequency.setValueAtTime(800, t);
-  osc.frequency.exponentialRampToValueAtTime(1200, t + 0.1);
-  
-  gain.gain.setValueAtTime(0, t);
-  gain.gain.linearRampToValueAtTime(0.5, t + 0.05);
-  gain.gain.exponentialRampToValueAtTime(0.01, t + 0.5);
-  
+  osc.frequency.setValueAtTime(620, now);
+  osc.frequency.exponentialRampToValueAtTime(240, now + 0.04);
+  gain.gain.setValueAtTime(0.08, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
   osc.connect(gain);
   gain.connect(ctx.destination);
-  
-  osc.start(t);
-  osc.stop(t + 0.5);
+  osc.start(now);
+  osc.stop(now + 0.04);
+}
+
+function playCorrect(ctx: AudioContext) {
+  const now = ctx.currentTime;
+  // Crystal 3-note harmonic arpeggio: C5 (523.25Hz), E5 (659.25Hz), G5 (783.99Hz)
+  const notes = [523.25, 659.25, 783.99];
+  notes.forEach((freq, idx) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    const startTime = now + idx * 0.065;
+    osc.frequency.setValueAtTime(freq, startTime);
+    gain.gain.setValueAtTime(0.14, startTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.35);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(startTime);
+    osc.stop(startTime + 0.35);
+  });
 }
 
 function playIncorrect(ctx: AudioContext) {
-  const t = ctx.currentTime;
-  
-  // Low "bzzzt" sound
+  const now = ctx.currentTime;
+  // Soft, low-pass filtered gentle double-thud (non-irritating)
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
-  
-  osc.type = 'sawtooth';
-  osc.frequency.setValueAtTime(150, t);
-  osc.frequency.linearRampToValueAtTime(120, t + 0.2);
-  
-  gain.gain.setValueAtTime(0, t);
-  gain.gain.linearRampToValueAtTime(0.3, t + 0.05);
-  gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
-  
-  osc.connect(gain);
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(320, now);
+
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(185, now);
+  osc.frequency.setValueAtTime(135, now + 0.08);
+  gain.gain.setValueAtTime(0.16, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+
+  osc.connect(filter);
+  filter.connect(gain);
   gain.connect(ctx.destination);
-  
-  osc.start(t);
-  osc.stop(t + 0.3);
+  osc.start(now);
+  osc.stop(now + 0.24);
 }
 
 function playFlip(ctx: AudioContext) {
-  const t = ctx.currentTime;
-  const duration = 0.1;
-  
-  // Short noise burst (card flip simulation)
-  const bufferSize = ctx.sampleRate * duration;
-  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-  const data = buffer.getChannelData(0);
-  
-  for (let i = 0; i < bufferSize; i++) {
-    data[i] = Math.random() * 2 - 1; // White noise
-  }
-  
-  const noiseSource = ctx.createBufferSource();
-  noiseSource.buffer = buffer;
-  
-  // Filter the noise to sound more like paper
+  const now = ctx.currentTime;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
   const filter = ctx.createBiquadFilter();
   filter.type = 'lowpass';
-  filter.frequency.setValueAtTime(2000, t);
-  
-  const gain = ctx.createGain();
-  gain.gain.setValueAtTime(0, t);
-  gain.gain.linearRampToValueAtTime(0.2, t + 0.02);
-  gain.gain.exponentialRampToValueAtTime(0.01, t + duration);
-  
-  noiseSource.connect(filter);
+  filter.frequency.setValueAtTime(1400, now);
+  filter.frequency.exponentialRampToValueAtTime(450, now + 0.09);
+
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(320, now);
+  osc.frequency.exponentialRampToValueAtTime(680, now + 0.085);
+  gain.gain.setValueAtTime(0.12, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+
+  osc.connect(filter);
   filter.connect(gain);
   gain.connect(ctx.destination);
-  
-  noiseSource.start(t);
+  osc.start(now);
+  osc.stop(now + 0.09);
+}
+
+function playStar(ctx: AudioContext) {
+  const now = ctx.currentTime;
+  const notes = [880, 1174.66, 1567.98];
+  notes.forEach((freq, idx) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    const startTime = now + idx * 0.055;
+    osc.frequency.setValueAtTime(freq, startTime);
+    gain.gain.setValueAtTime(0.12, startTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.28);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(startTime);
+    osc.stop(startTime + 0.28);
+  });
 }
 
 function playComplete(ctx: AudioContext) {
-  const t = ctx.currentTime;
-  
-  // Arpeggio C5 E5 G5 C6
+  const now = ctx.currentTime;
+  // Victory fanfare C5 - E5 - G5 - C6
   const freqs = [523.25, 659.25, 783.99, 1046.50];
-  
   freqs.forEach((freq, i) => {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    
-    const startTime = t + i * 0.15;
-    
-    osc.type = 'sine';
+    const startTime = now + i * 0.09;
+    osc.type = 'triangle';
     osc.frequency.setValueAtTime(freq, startTime);
-    
-    gain.gain.setValueAtTime(0, startTime);
-    gain.gain.linearRampToValueAtTime(0.3, startTime + 0.05);
-    gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.5);
-    
+    gain.gain.setValueAtTime(0.18, startTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.45);
     osc.connect(gain);
     gain.connect(ctx.destination);
-    
     osc.start(startTime);
-    osc.stop(startTime + 0.5);
+    osc.stop(startTime + 0.45);
   });
+}
+
+function playToggle(ctx: AudioContext) {
+  const now = ctx.currentTime;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(750, now);
+  osc.frequency.exponentialRampToValueAtTime(1100, now + 0.03);
+  gain.gain.setValueAtTime(0.08, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(now);
+  osc.stop(now + 0.03);
 }

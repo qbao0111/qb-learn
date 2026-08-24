@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseQuizletRows } from '../src/lib/quizlet-parser.ts';
+import { cleanText, parseQuizletRows } from '../src/lib/quizlet-parser.ts';
 import {
   isUsableQuestion,
   normalizeQuestionAnswers,
@@ -309,4 +309,74 @@ test('reads a repeated answer text from the right side of a Quizlet table', () =
     text: 'Năng suất lao động; cường độ lao động',
   });
   assert.deepEqual(questions[1].answerKeys, ['D']);
+});
+
+test('parses numbered questions whose choices are inline in one paragraph', () => {
+  const questions = parseQuizletRows([
+    {
+      page: 1,
+      parts: [{
+        x: 15,
+        text: '1. Trong công thức W = c + v + m, hao phí lao động quá khứ là đại lượng nào?',
+      }],
+    },
+    { page: 1, parts: [{ x: 15, text: 'A. v B. v + m C. m D. c: D' }] },
+    {
+      page: 1,
+      parts: [{
+        x: 15,
+        text: '2. Tại sao chọn vàng làm vật ngang giá? A. Có giá trị B. Dễ bảo quản C. Thuần nhất D. Dễ vận chuyển: A C',
+      }],
+    },
+  ]);
+
+  assert.equal(questions.length, 2);
+  assert.equal(
+    questions[0].question,
+    'Trong công thức W = c + v + m, hao phí lao động quá khứ là đại lượng nào?',
+  );
+  assert.deepEqual(questions[0].options.map((option) => option.key), ['A', 'B', 'C', 'D']);
+  assert.deepEqual(questions[0].answerKeys, ['D']);
+  assert.deepEqual(questions[1].answerKeys, ['A', 'C']);
+});
+
+test('does not mistake a colon before option A for an answer explanation', () => {
+  const questions = parseQuizletRows([
+    {
+      page: 1,
+      parts: [{ x: 15, text: '62. Căn cứ vào vai trò của các bộ phận tư bản trong quá trình' }],
+    },
+    {
+      page: 1,
+      parts: [{ x: 15, text: 'sản xuất gồm: A. Tư bản cố định B. Tư bản lưu động' }],
+    },
+    {
+      page: 1,
+      parts: [{ x: 15, text: 'C. Tư bản bất biến D. Tư bản khả biến: C' }],
+    },
+    {
+      page: 1,
+      parts: [{ x: 15, text: '63. Câu hỏi kế tiếp? A. Một B. Hai C. Ba D. Bốn: D' }],
+    },
+  ]);
+
+  assert.equal(questions.length, 2);
+  assert.equal(
+    questions[0].question,
+    'Căn cứ vào vai trò của các bộ phận tư bản trong quá trình sản xuất gồm:',
+  );
+  assert.deepEqual(questions[0].options.map((option) => option.key), ['A', 'B', 'C', 'D']);
+  assert.deepEqual(questions[0].answerKeys, ['C']);
+});
+
+test('restores Vietnamese dot-below glyphs corrupted by a PDF font', () => {
+  assert.equal(
+    cleanText('go@i thi@ trường, giá tri@ sử du@ng, mu@c đích, phu@ thuộc'),
+    'gọi thị trường, giá trị sử dụng, mục đích, phụ thuộc',
+  );
+  assert.equal(
+    cleanText('a@ ă@ â@ e@ ê@ i@ o@ ô@ ơ@ u@ ư@ y@'),
+    'ạ ặ ậ ẹ ệ ị ọ ộ ợ ụ ự ỵ',
+  );
+  assert.equal(cleanText('Liên hệ: quiz@example.com'), 'Liên hệ: quiz@example.com');
 });

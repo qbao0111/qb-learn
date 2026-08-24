@@ -189,6 +189,22 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'qblearn-storage',
+      version: 1,
+      migrate: (persistedState) => {
+        const state = persistedState as AppState;
+        if (!state || !Array.isArray(state.banks)) return state;
+
+        return {
+          ...state,
+          banks: state.banks.map((bank) => ({
+            ...bank,
+            questions: bank.questions.map((question) => ({
+              ...normalizeQuestionAnswers(question),
+              id: question.id,
+            })),
+          })),
+        };
+      },
     }
   )
 );
