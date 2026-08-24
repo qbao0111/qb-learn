@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLearnSession } from '../hooks/useLearnSession';
 import { useActiveQuestions } from '../hooks/useActiveQuestions';
@@ -46,12 +46,46 @@ export function LearnMode() {
   const [isAnswered, setIsAnswered] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
 
-  // Reset state when question changes
+  const containerRef = useRef<HTMLDivElement>(null);
+  const feedbackRef = useRef<HTMLDivElement>(null);
+
+  // Reset state & scroll when question changes
   useEffect(() => {
     setSelectedKeys([]);
     setIsAnswered(false);
     setIsCorrect(false);
+    
+    // Scroll container back to top
+    if (containerRef.current) {
+      const scrollableParent = containerRef.current.closest('.overflow-y-auto');
+      if (scrollableParent) {
+        scrollableParent.scrollTo({ top: 0, behavior: 'instant' });
+      }
+    }
   }, [session.currentQuestion]);
+
+  // Auto scroll feedback into view when answered
+  useEffect(() => {
+    if (isAnswered && feedbackRef.current) {
+      const timer = setTimeout(() => {
+        feedbackRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [isAnswered]);
+
+  // Auto advance to next question when answered correctly
+  useEffect(() => {
+    let timer: any;
+    if (isAnswered && isCorrect) {
+      timer = setTimeout(() => {
+        session.nextQuestion();
+      }, 950);
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [isAnswered, isCorrect, session]);
 
   const { currentQuestion } = session;
   const correctKeys = useMemo(() => {
@@ -251,42 +285,42 @@ export function LearnMode() {
   const correctOptionObjects = currentQuestion.options.filter(o => correctKeys.includes(o.key));
 
   return (
-    <div className="w-full max-w-3xl mx-auto flex flex-col h-full py-4 px-2">
+    <div ref={containerRef} className="w-full max-w-3xl mx-auto flex flex-col py-1 px-1 sm:px-2 pb-16">
       {/* Quizlet Header & Progress Bar */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between gap-4 mb-3">
-          <div className="flex items-center gap-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-primary/10 text-primary">
+      <div className="mb-4">
+        <div className="flex items-center justify-between gap-3 mb-2.5">
+          <div className="flex items-center gap-2.5">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-primary/10 text-primary">
               <Sparkles size={13} /> Học thông minh
             </span>
-            <span className="text-sm font-semibold text-text-muted">
+            <span className="text-xs sm:text-sm font-semibold text-text-muted">
               Còn <strong className="text-text font-bold">{session.remainingToLearn}</strong> câu
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200/60 shadow-xs">
-                <Check size={14} className="stroke-[3]" /> {session.stats.correct}
+          <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/60 shadow-xs">
+                <Check size={13} className="stroke-[3]" /> {session.stats.correct}
               </div>
-              <div className="flex items-center gap-1.5 text-xs font-bold text-rose-700 bg-rose-50 px-3 py-1 rounded-full border border-rose-200/60 shadow-xs">
-                <X size={14} className="stroke-[3]" /> {session.stats.incorrect}
+              <div className="flex items-center gap-1 text-xs font-bold text-rose-700 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200/60 shadow-xs">
+                <X size={13} className="stroke-[3]" /> {session.stats.incorrect}
               </div>
             </div>
 
             <button 
               onClick={() => setSettings(null)}
-              className="p-1.5 text-text-muted hover:text-primary hover:bg-surface-2 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-semibold"
+              className="p-1.5 text-text-muted hover:text-primary hover:bg-surface-2 rounded-lg transition-colors flex items-center gap-1 text-xs font-semibold"
               title="Thiết lập lại"
             >
-              <RefreshCw size={15} />
+              <RefreshCw size={14} />
               <span className="hidden sm:inline">Cài đặt</span>
             </button>
           </div>
         </div>
 
         {/* Continuous Animated Progress Bar */}
-        <div className="w-full h-2 rounded-full bg-surface-2 border border-border/60 overflow-hidden">
+        <div className="w-full h-1.5 sm:h-2 rounded-full bg-surface-2 border border-border/60 overflow-hidden">
           <motion.div 
             className="h-full bg-gradient-to-r from-primary to-indigo-500 rounded-full"
             initial={{ width: 0 }}
@@ -306,8 +340,8 @@ export function LearnMode() {
           transition={{ duration: 0.22, ease: "easeOut" }}
           className="flex-1 flex flex-col"
         >
-          <div className="bg-surface border border-border/90 rounded-2xl p-7 shadow-sm mb-5 relative">
-            <div className="flex items-center justify-between gap-4 mb-4 pb-3 border-b border-border/50">
+          <div className="bg-surface border border-border/90 rounded-2xl p-4 sm:p-5 shadow-sm mb-3.5 relative">
+            <div className="flex items-center justify-between gap-4 mb-2.5 pb-2 border-b border-border/50">
               <span className="text-xs font-bold uppercase tracking-widest text-text-muted">
                 Thuật ngữ #{currentQuestion.id}
               </span>
@@ -316,28 +350,28 @@ export function LearnMode() {
                 <button
                   type="button"
                   onClick={() => speakQuestion(currentQuestion.question)}
-                  className="p-2 text-text-muted hover:text-primary hover:bg-surface-2 rounded-lg transition-colors"
+                  className="p-1.5 text-text-muted hover:text-primary hover:bg-surface-2 rounded-lg transition-colors"
                   title="Phát âm câu hỏi (TTS)"
                 >
-                  <Volume2 size={18} />
+                  <Volume2 size={16} />
                 </button>
                 <button
                   type="button"
                   onClick={() => toggleStar(currentQuestion.id)}
-                  className={`p-2 rounded-lg transition-colors ${isStarred ? 'text-amber-500 bg-amber-50' : 'text-text-muted hover:text-amber-500 hover:bg-surface-2'}`}
+                  className={`p-1.5 rounded-lg transition-colors ${isStarred ? 'text-amber-500 bg-amber-50' : 'text-text-muted hover:text-amber-500 hover:bg-surface-2'}`}
                   title="Gắn sao câu hỏi này"
                 >
-                  <Star size={18} fill={isStarred ? 'currentColor' : 'none'} />
+                  <Star size={16} fill={isStarred ? 'currentColor' : 'none'} />
                 </button>
               </div>
             </div>
 
-            <h3 className="text-xl sm:text-2xl font-bold text-text leading-relaxed">
+            <h3 className="text-base sm:text-lg lg:text-xl font-bold text-text leading-snug">
               {currentQuestion.question}
             </h3>
 
             {currentQuestion.imageDataUrl && (
-              <div className="mt-5">
+              <div className="mt-3">
                 <QuestionImage src={currentQuestion.imageDataUrl} />
               </div>
             )}
@@ -345,19 +379,19 @@ export function LearnMode() {
 
           {/* Multiple choice guidance */}
           {isMultiple && !isAnswered && (
-            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-primary bg-primary/10 px-3.5 py-1.5 rounded-xl border border-primary/20 w-fit">
-              <Lightbulb size={16} /> Chọn {correctKeys.length} đáp án đúng, sau đó nhấn Kiểm tra
+            <div className="mb-2.5 flex items-center gap-2 text-xs sm:text-sm font-semibold text-primary bg-primary/10 px-3 py-1 rounded-xl border border-primary/20 w-fit">
+              <Lightbulb size={15} /> Chọn {correctKeys.length} đáp án đúng, sau đó nhấn Kiểm tra
             </div>
           )}
 
           {/* Options Grid (Quizlet Pro Style) */}
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-2.5">
             {currentQuestion.options.map((opt, index) => {
               const isSelected = selectedKeys.includes(opt.key);
               const isActuallyCorrect = correctKeys.includes(opt.key);
               const shortcutNumber = index + 1;
               
-              let cardStyle = "w-full text-left p-4 sm:p-4.5 rounded-xl border-2 transition-all font-medium text-base flex items-center justify-between gap-3.5 ";
+              let cardStyle = "w-full text-left p-3 sm:p-3.5 rounded-xl border-2 transition-all font-medium text-sm sm:text-base flex items-center justify-between gap-3 ";
               
               if (!isAnswered) {
                 cardStyle += isSelected 
@@ -376,16 +410,16 @@ export function LearnMode() {
               return (
                 <motion.button
                   key={opt.key}
-                  whileHover={!isAnswered ? { scale: 1.008, y: -1 } : {}}
+                  whileHover={!isAnswered ? { scale: 1.006, y: -1 } : {}}
                   whileTap={!isAnswered ? { scale: 0.985 } : {}}
-                  animate={isAnswered && isSelected && !isActuallyCorrect ? { x: [-6, 6, -5, 5, 0] } : {}}
+                  animate={isAnswered && isSelected && !isActuallyCorrect ? { x: [-5, 5, -4, 4, 0] } : {}}
                   transition={{ duration: 0.25 }}
                   onClick={() => handleSelect(opt.key)}
                   disabled={isAnswered}
                   className={cardStyle}
                 >
-                  <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                    <span className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0 transition-colors ${
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <span className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center font-bold text-xs sm:text-sm flex-shrink-0 transition-colors ${
                       isAnswered && isActuallyCorrect 
                         ? 'bg-emerald-500 text-white' 
                         : isAnswered && isSelected && !isActuallyCorrect
@@ -401,15 +435,15 @@ export function LearnMode() {
 
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {!isAnswered && (
-                      <kbd className="hidden sm:inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-md text-xs font-bold text-text-muted bg-surface-2 border border-border shadow-xs">
+                      <kbd className="hidden sm:inline-flex items-center justify-center min-w-[20px] h-[20px] px-1 rounded-md text-xs font-bold text-text-muted bg-surface-2 border border-border shadow-xs">
                         {shortcutNumber}
                       </kbd>
                     )}
                     {isAnswered && isActuallyCorrect && (
-                      <CheckCircle2 className="text-emerald-600 flex-shrink-0" size={22} />
+                      <CheckCircle2 className="text-emerald-600 flex-shrink-0" size={20} />
                     )}
                     {isAnswered && isSelected && !isActuallyCorrect && (
-                      <XCircle className="text-rose-600 flex-shrink-0" size={22} />
+                      <XCircle className="text-rose-600 flex-shrink-0" size={20} />
                     )}
                   </div>
                 </motion.button>
@@ -423,7 +457,7 @@ export function LearnMode() {
               type="button"
               onClick={() => submitAnswer(selectedKeys)}
               disabled={selectedKeys.length === 0}
-              className="mt-4 w-full rounded-xl bg-primary py-3.5 text-base font-bold text-white shadow-md shadow-primary/25 transition-all hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-40"
+              className="mt-3 w-full rounded-xl bg-primary py-3 text-sm sm:text-base font-bold text-white shadow-md shadow-primary/25 transition-all hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-40"
             >
               Kiểm tra đáp án ({selectedKeys.length}/{correctKeys.length})
             </button>
@@ -432,73 +466,83 @@ export function LearnMode() {
           {/* Quizlet Feedback & Comparison Section */}
           {isAnswered && (
             <motion.div 
-              initial={{ opacity: 0, y: 14 }}
+              ref={feedbackRef}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-6 pt-5 border-t border-border"
+              className="mt-4 pt-3.5 border-t border-border"
             >
               {isCorrect ? (
                 /* Correct Celebration Banner */
-                <div className="mb-5 p-4 rounded-xl bg-emerald-50/90 border border-emerald-300 flex items-center justify-between gap-3 text-emerald-950 shadow-xs">
+                <div className="p-3 sm:p-3.5 rounded-xl bg-emerald-50/90 border border-emerald-300 flex items-center justify-between gap-3 text-emerald-950 shadow-xs">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-emerald-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
-                      <Check size={20} className="stroke-[3]" />
+                    <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <Check size={18} className="stroke-[3]" />
                     </div>
                     <div>
-                      <strong className="block text-base font-extrabold text-emerald-900">Chính xác! Làm rất tốt.</strong>
-                      <span className="text-sm text-emerald-800">
+                      <strong className="block text-sm sm:text-base font-extrabold text-emerald-900">Chính xác! Làm rất tốt.</strong>
+                      <span className="text-xs sm:text-sm text-emerald-800 line-clamp-1">
                         {correctOptionObjects.map(o => `${o.key}. ${o.text}`).join(' · ')}
                       </span>
                     </div>
                   </div>
+                  <button 
+                    onClick={session.nextQuestion}
+                    className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center gap-1.5 flex-shrink-0 shadow-xs"
+                  >
+                    <span>Tiếp tục</span>
+                    <ArrowRight size={14} />
+                  </button>
                 </div>
               ) : (
                 /* Quizlet Learning Comparison Box (Don't worry, you are learning) */
-                <div className="mb-5 rounded-2xl bg-surface border border-border shadow-sm overflow-hidden">
-                  <div className="bg-rose-50/80 px-5 py-3 border-b border-rose-200/70 flex items-center gap-2 text-rose-900 font-bold text-sm">
-                    <Lightbulb size={18} className="text-rose-600" />
-                    Đừng lo lắng, hãy cùng ghi nhớ đáp án đúng:
-                  </div>
+                <div className="space-y-3.5">
+                  <div className="rounded-2xl bg-surface border border-border shadow-sm overflow-hidden">
+                    <div className="bg-rose-50/80 px-4 py-2.5 border-b border-rose-200/70 flex items-center gap-2 text-rose-900 font-bold text-xs sm:text-sm">
+                      <Lightbulb size={16} className="text-rose-600" />
+                      Đừng lo lắng, hãy cùng ghi nhớ đáp án đúng:
+                    </div>
 
-                  <div className="p-5 space-y-3.5">
-                    {/* Wrong selection */}
-                    {selectedOptionObjects.length > 0 && (
-                      <div className="p-3.5 rounded-xl bg-rose-50/60 border border-rose-200">
-                        <span className="block text-xs font-bold text-rose-700 uppercase tracking-wider mb-1">
-                          ❌ Bạn đã chọn:
-                        </span>
-                        <p className="text-sm font-semibold text-rose-950">
-                          {selectedOptionObjects.map(o => `${o.key}. ${o.text}`).join(' · ')}
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Correct answer */}
-                    <div className="p-3.5 rounded-xl bg-emerald-50/80 border border-emerald-300">
-                      <span className="block text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1">
-                        ✅ Đáp án đúng:
-                      </span>
-                      <p className="text-sm font-bold text-emerald-950">
-                        {correctOptionObjects.map(o => `${o.key}. ${o.text}`).join(' · ')}
-                      </p>
-                      {currentQuestion.answer && (
-                        <p className="mt-1.5 text-xs text-emerald-800 font-medium border-t border-emerald-200/80 pt-1.5">
-                          Ghi chú: {currentQuestion.answer}
-                        </p>
+                    <div className="p-3.5 sm:p-4 space-y-2.5">
+                      {/* Wrong selection */}
+                      {selectedOptionObjects.length > 0 && (
+                        <div className="p-2.5 sm:p-3 rounded-xl bg-rose-50/60 border border-rose-200">
+                          <span className="block text-xs font-bold text-rose-700 uppercase tracking-wider mb-0.5">
+                            ❌ Bạn đã chọn:
+                          </span>
+                          <p className="text-xs sm:text-sm font-semibold text-rose-950">
+                            {selectedOptionObjects.map(o => `${o.key}. ${o.text}`).join(' · ')}
+                          </p>
+                        </div>
                       )}
+
+                      {/* Correct answer */}
+                      <div className="p-2.5 sm:p-3 rounded-xl bg-emerald-50/80 border border-emerald-300">
+                        <span className="block text-xs font-bold text-emerald-700 uppercase tracking-wider mb-0.5">
+                          ✅ Đáp án đúng:
+                        </span>
+                        <p className="text-xs sm:text-sm font-bold text-emerald-950">
+                          {correctOptionObjects.map(o => `${o.key}. ${o.text}`).join(' · ')}
+                        </p>
+                        {currentQuestion.answer && (
+                          <p className="mt-1 text-xs text-emerald-800 font-medium border-t border-emerald-200/80 pt-1">
+                            Ghi chú: {currentQuestion.answer}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
+
+                  {/* Action Button */}
+                  <button 
+                    onClick={session.nextQuestion}
+                    className="w-full py-3 sm:py-3.5 bg-primary text-white font-extrabold rounded-xl hover:bg-primary-hover transition-all shadow-md shadow-primary/25 text-sm sm:text-base flex items-center justify-center gap-2 group"
+                  >
+                    <span>Tiếp tục</span>
+                    <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                    <span className="text-white/75 text-xs font-normal ml-1">(Phím Space hoặc Enter)</span>
+                  </button>
                 </div>
               )}
-
-              {/* Action Button */}
-              <button 
-                onClick={session.nextQuestion}
-                className="w-full py-4 bg-primary text-white font-extrabold rounded-xl hover:bg-primary-hover transition-all shadow-lg shadow-primary/25 text-base flex items-center justify-center gap-2.5 group"
-              >
-                <span>Tiếp tục</span>
-                <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
-                <span className="text-white/70 text-xs font-normal ml-1">(Phím Space hoặc Enter)</span>
-              </button>
             </motion.div>
           )}
         </motion.div>

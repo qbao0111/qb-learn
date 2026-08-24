@@ -105,7 +105,7 @@ function App() {
         </header>
 
         {/* CONTENT AREA */}
-        <div className="flex-1 overflow-y-auto p-8 flex flex-col items-center">
+        <div className="flex-1 overflow-y-auto px-4 py-3 sm:px-6 sm:py-4 flex flex-col items-center">
           {mode === 'overview' && <Overview />}
           
           {mode === 'flashcards' && <FlashcardMode />}
