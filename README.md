@@ -7,6 +7,7 @@ kiểm tra ngẫu nhiên.
 ## Tính năng
 
 - Import bộ đề từ PDF xuất theo định dạng Quizlet Print.
+- Nhập bộ đề bằng cách dán văn bản hoặc tải file TSV/TXT/CSV giống Quizlet.
 - Tự nhận diện câu hỏi, các lựa chọn A–D và đáp án.
 - Tự loại câu hỏi trùng lặp và báo số câu có thể sử dụng.
 - Quản lý nhiều bộ đề và ghi nhớ bộ đề đang chọn.
@@ -56,6 +57,24 @@ một bản đầy đủ giữa các thiết bị mà không cần tài khoản 
 Mã đồng bộ chỉ được lưu trên từng thiết bị và được băm trước khi dùng làm khóa
 không gian dữ liệu trong Postgres. Không đưa `DATABASE_URL` vào biến bắt đầu bằng
 `VITE_`; chuỗi kết nối chỉ được cấu hình cho Vercel Function.
+
+### Nhập bộ đề từ văn bản hoặc TSV
+
+1. Vào **Tổng quan → Nhập văn bản / TSV**.
+2. Dán dữ liệu, mỗi câu trên một dòng và dùng phím Tab để ngăn câu hỏi với đáp án.
+3. Hoặc chọn file `.tsv`, `.txt`, `.csv`; app tự chọn Tab cho TSV và dấu phẩy cho CSV.
+4. Kiểm tra số câu hợp lệ/lỗi trong phần xem trước rồi bấm **Nhập**.
+
+Ví dụ:
+
+```text
+Câu hỏi? A. Một B. Hai C. Ba D. Bốn<TAB>B
+Câu nhiều đáp án? A. Đúng B. Sai C. Cũng đúng D. Không<TAB>AC
+```
+
+Có thể thay Tab/dòng mới bằng dấu phẩy, dấu chấm phẩy hoặc dấu tùy chỉnh. Với
+CSV/TSV có dấu phân cách hoặc xuống dòng bên trong nội dung, hãy đặt trường đó
+trong dấu ngoặc kép.
 
 ## Công nghệ
 

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useCallback, useState, useRef } from 'react';
 import {
   Upload,
   FileText,
@@ -10,6 +10,7 @@ import {
   Cloud,
   CloudOff,
   RefreshCw,
+  FileSpreadsheet,
 } from 'lucide-react';
 import { useStore } from '../store';
 import { parseQuizletPdf } from '../lib/pdf-loader';
@@ -26,6 +27,7 @@ import {
   syncCloudNow,
   useCloudSyncState,
 } from '../lib/cloud-sync';
+import { TextBankImportDialog } from './TextBankImportDialog';
 
 export function Overview() {
   const { banks, activeBankId, setActiveBank, addBank, deleteBank, restoreBanks } = useStore();
@@ -40,9 +42,11 @@ export function Overview() {
   const [exportError, setExportError] = useState('');
   const [syncCode, setSyncCode] = useState('');
   const [syncActionError, setSyncActionError] = useState('');
+  const [textImportOpen, setTextImportOpen] = useState(false);
   const syncState = useCloudSyncState();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const backupInputRef = useRef<HTMLInputElement>(null);
+  const closeTextImport = useCallback(() => setTextImportOpen(false), []);
 
   const handleConnectSync = async () => {
     setSyncActionError('');
@@ -180,11 +184,23 @@ export function Overview() {
     <div className="mx-auto w-full max-w-4xl space-y-5 pb-6 sm:space-y-8 sm:pb-12">
       {/* Upload Section */}
       <section className="rounded-2xl border border-border bg-surface p-4 shadow-sm sm:p-8">
-        <h3 className="text-xl font-bold mb-2 flex items-center gap-2 text-text">
-          <Upload className="text-primary" />
-          Tạo bộ đề mới
-        </h3>
-        <p className="text-text-muted mb-6">Nhập trực tiếp từ file PDF xuất từ Quizlet (Quizlet Print).</p>
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h3 className="mb-2 flex items-center gap-2 text-xl font-bold text-text">
+              <Upload className="text-primary" />
+              Tạo bộ đề mới
+            </h3>
+            <p className="text-text-muted">Nhập từ PDF Quizlet hoặc dán dữ liệu dạng bảng.</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setTextImportOpen(true)}
+            className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-primary/25 bg-primary/5 px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            <FileSpreadsheet size={19} />
+            Nhập văn bản / TSV
+          </button>
+        </div>
         
         <div
           className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-colors sm:p-10 ${isDragging ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}
@@ -451,6 +467,8 @@ export function Overview() {
           ))}
         </div>
       </section>
+
+      <TextBankImportDialog open={textImportOpen} onClose={closeTextImport} />
     </div>
   );
 }

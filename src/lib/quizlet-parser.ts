@@ -74,7 +74,7 @@ function parseTableAnswer(value: string) {
   return cleanText(value).match(/^([A-Z]{1,26})(?:\.|\s|$)/)?.[1] || '';
 }
 
-function parseInlineOptions(value: string) {
+export function parseInlineOptions(value: string) {
   const text = cleanText(value);
   const markerPattern = /(?:^|\s)([A-Z])\.\s*/g;
   const markers: Array<{ key: string; start: number; contentStart: number }> = [];
