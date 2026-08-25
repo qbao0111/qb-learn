@@ -154,9 +154,9 @@ export function Overview() {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-8 pb-12">
+    <div className="mx-auto w-full max-w-4xl space-y-5 pb-6 sm:space-y-8 sm:pb-12">
       {/* Upload Section */}
-      <section className="bg-surface rounded-2xl border border-border p-8 shadow-sm">
+      <section className="rounded-2xl border border-border bg-surface p-4 shadow-sm sm:p-8">
         <h3 className="text-xl font-bold mb-2 flex items-center gap-2 text-text">
           <Upload className="text-primary" />
           Tạo bộ đề mới
@@ -164,7 +164,7 @@ export function Overview() {
         <p className="text-text-muted mb-6">Nhập trực tiếp từ file PDF xuất từ Quizlet (Quizlet Print).</p>
         
         <div
-          className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center text-center transition-colors cursor-pointer ${isDragging ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}
+          className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-colors sm:p-10 ${isDragging ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}
           onDragOver={onDragOver}
           onDragLeave={onDragLeave}
           onDrop={onDrop}
@@ -259,12 +259,12 @@ export function Overview() {
 
       {/* Bank Manager */}
       <section className="bg-surface rounded-2xl border border-border overflow-hidden shadow-sm">
-        <div className="flex items-center justify-between gap-4 p-6 border-b border-border">
-          <div>
+        <div className="flex flex-col gap-4 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+          <div className="min-w-0">
             <h3 className="text-xl font-bold text-text">Quản lý bộ đề</h3>
             <p className="mt-1 text-sm text-text-muted">Sao lưu để chuyển toàn bộ bộ đề sang thiết bị khác.</p>
           </div>
-          <div className="flex shrink-0 flex-wrap justify-end gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0 sm:flex-wrap sm:justify-end">
             <input
               ref={backupInputRef}
               type="file"
@@ -275,7 +275,7 @@ export function Overview() {
             <button
               type="button"
               onClick={() => backupInputRef.current?.click()}
-              className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
             >
               <Upload size={18} aria-hidden="true" />
               <span>Khôi phục</span>
@@ -283,7 +283,7 @@ export function Overview() {
             <button
               type="button"
               onClick={() => downloadBanksBackup(banks)}
-              className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
             >
               <Download size={18} aria-hidden="true" />
               <span>Sao lưu</span>
