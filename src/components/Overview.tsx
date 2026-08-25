@@ -7,6 +7,9 @@ import {
   X,
   Download,
   LoaderCircle,
+  Cloud,
+  CloudOff,
+  RefreshCw,
 } from 'lucide-react';
 import { useStore } from '../store';
 import { parseQuizletPdf } from '../lib/pdf-loader';
@@ -16,6 +19,13 @@ import {
 } from '../lib/import-bank';
 import { downloadQuizletPdf } from '../lib/quizlet-pdf-export';
 import { downloadBanksBackup, readBanksBackup } from '../lib/data-backup';
+import {
+  connectCloudSync,
+  disconnectCloudSync,
+  hasStoredSyncCode,
+  syncCloudNow,
+  useCloudSyncState,
+} from '../lib/cloud-sync';
 
 export function Overview() {
   const { banks, activeBankId, setActiveBank, addBank, deleteBank, restoreBanks } = useStore();
@@ -28,8 +38,21 @@ export function Overview() {
   const [removeDuplicates, setRemoveDuplicates] = useState(false);
   const [exportingBankId, setExportingBankId] = useState<string | null>(null);
   const [exportError, setExportError] = useState('');
+  const [syncCode, setSyncCode] = useState('');
+  const [syncActionError, setSyncActionError] = useState('');
+  const syncState = useCloudSyncState();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const backupInputRef = useRef<HTMLInputElement>(null);
+
+  const handleConnectSync = async () => {
+    setSyncActionError('');
+    try {
+      await connectCloudSync(syncCode);
+      setSyncCode('');
+    } catch (error) {
+      setSyncActionError(error instanceof Error ? error.message : 'Không thể kết nối đồng bộ.');
+    }
+  };
 
   const handleRestoreBackup = async (file?: File) => {
     if (!file) return;
@@ -255,6 +278,84 @@ export function Overview() {
             {status}
           </div>
         )}
+      </section>
+
+      {/* Neon Sync */}
+      <section className="rounded-2xl border border-border bg-surface p-4 shadow-sm sm:p-6">
+        <div className="flex items-start gap-3">
+          <div className={`rounded-xl p-2.5 ${syncState.connected ? 'bg-emerald-50 text-emerald-600' : 'bg-primary/10 text-primary'}`}>
+            {syncState.connected ? <Cloud size={22} /> : <CloudOff size={22} />}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-lg font-bold text-text">Đồng bộ Neon</h3>
+              <span className={`rounded-full px-2 py-1 text-xs font-semibold ${syncState.connected ? 'bg-emerald-50 text-emerald-700' : 'bg-surface-2 text-text-muted'}`}>
+                {syncState.connected ? 'Đã kết nối' : 'Chưa kết nối'}
+              </span>
+            </div>
+            <p className="mt-1 text-sm text-text-muted">{syncState.message}</p>
+            {syncState.lastSyncedAt && (
+              <p className="mt-1 text-xs text-text-muted">
+                Cập nhật lúc {new Date(syncState.lastSyncedAt).toLocaleTimeString('vi-VN')}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {!syncState.connected ? (
+          <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
+            <label className="block">
+              <span className="sr-only">Mã đồng bộ</span>
+              <input
+                type="password"
+                value={syncCode}
+                onChange={(event) => setSyncCode(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') void handleConnectSync();
+                }}
+                placeholder="Tạo hoặc nhập mã đồng bộ (ít nhất 8 ký tự)"
+                autoComplete="off"
+                className="min-h-11 w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-text outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15"
+              />
+            </label>
+            <button
+              type="button"
+              onClick={() => void handleConnectSync()}
+              disabled={syncState.phase === 'connecting' || syncCode.trim().length < 8}
+              className="min-h-11 rounded-xl bg-primary px-5 py-2.5 font-semibold text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {syncState.phase === 'connecting' ? 'Đang kết nối…' : hasStoredSyncCode() ? 'Kết nối lại' : 'Bật đồng bộ'}
+            </button>
+          </div>
+        ) : (
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:flex sm:justify-end">
+            <button
+              type="button"
+              onClick={() => void syncCloudNow()}
+              disabled={syncState.phase === 'syncing'}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:text-primary disabled:opacity-50"
+            >
+              <RefreshCw size={17} className={syncState.phase === 'syncing' ? 'animate-spin' : ''} />
+              Đồng bộ ngay
+            </button>
+            <button
+              type="button"
+              onClick={disconnectCloudSync}
+              className="min-h-11 rounded-xl border border-border px-4 py-2 text-sm font-semibold text-text-muted transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+            >
+              Ngắt kết nối
+            </button>
+          </div>
+        )}
+
+        {syncActionError && (
+          <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm font-medium text-red-700" role="alert">
+            {syncActionError}
+          </p>
+        )}
+        <p className="mt-3 text-xs leading-relaxed text-text-muted">
+          Nhập cùng một mã trên máy tính và iPhone. Mã không được lưu trong database; hãy dùng mã khó đoán và không chia sẻ cho người khác.
+        </p>
       </section>
 
       {/* Bank Manager */}

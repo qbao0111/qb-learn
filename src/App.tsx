@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { 
   Layers, 
   GraduationCap, 
@@ -16,6 +16,7 @@ import { ExamMode } from './components/ExamMode';
 import { QuestionManager } from './components/QuestionManager';
 
 import { useStore } from './store';
+import { startCloudSync } from './lib/cloud-sync';
 
 type AppMode = 'overview' | 'flashcards' | 'learn' | 'exam' | 'manage';
 
@@ -44,6 +45,8 @@ function App() {
   const [mode, setMode] = useState<AppMode>('overview');
   const soundEnabled = useStore(state => state.soundEnabled);
   const toggleSound = useStore(state => state.toggleSound);
+
+  useEffect(() => startCloudSync(), []);
 
   return (
     <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-background">

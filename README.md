@@ -13,7 +13,7 @@ kiểm tra ngẫu nhiên.
 - Học bằng flashcard có hiệu ứng lật 3D.
 - Chế độ học có phản hồi đúng/sai.
 - Tạo bài kiểm tra ngẫu nhiên với số câu và thời gian tùy chỉnh.
-- Lưu dữ liệu trực tiếp trong `localStorage`, không cần backend.
+- Lưu dữ liệu cục bộ để dùng offline và tùy chọn đồng bộ qua Neon Postgres.
 - Có thể cài dưới dạng PWA trên iPhone, iPad, Android và máy tính.
 - Sao lưu/khôi phục toàn bộ bộ đề bằng một file JSON để chuyển thiết bị.
 
@@ -46,6 +46,17 @@ https://qbao0111.github.io/qb-learn/
 Dữ liệu được lưu riêng trên từng thiết bị. Thao tác sao lưu/khôi phục giúp chuyển
 một bản đầy đủ giữa các thiết bị mà không cần tài khoản hoặc máy chủ dữ liệu.
 
+### Đồng bộ bộ đề qua Neon
+
+1. Mở **Tổng quan → Đồng bộ Neon** trên máy tính.
+2. Tạo một mã đồng bộ khó đoán, dài ít nhất 8 ký tự, rồi chọn **Bật đồng bộ**.
+3. Mở cùng mục trên iPhone và nhập chính xác mã đó.
+4. App tự lưu thay đổi lên Neon và kiểm tra dữ liệu mới từ thiết bị khác mỗi 5 giây.
+
+Mã đồng bộ chỉ được lưu trên từng thiết bị và được băm trước khi dùng làm khóa
+không gian dữ liệu trong Postgres. Không đưa `DATABASE_URL` vào biến bắt đầu bằng
+`VITE_`; chuỗi kết nối chỉ được cấu hình cho Vercel Function.
+
 ## Công nghệ
 
 - React 19
@@ -53,6 +64,7 @@ một bản đầy đủ giữa các thiết bị mà không cần tài khoản 
 - Vite 8
 - Tailwind CSS 4
 - Zustand
+- Neon Postgres và Vercel Functions
 - PDF.js
 - Framer Motion
 
