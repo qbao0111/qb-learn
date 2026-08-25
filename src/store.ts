@@ -48,6 +48,7 @@ interface AppState {
   setActiveBank: (id: string) => void;
   getActiveQuestions: () => Question[];
   deleteBank: (id: string) => void;
+  restoreBanks: (banks: Bank[]) => void;
   toggleSound: () => void;
   addQuestion: (bankId: string, question: Omit<Question, 'id'>) => void;
   updateQuestion: (bankId: string, questionId: number, question: Omit<Question, 'id'>) => void;
@@ -178,6 +179,19 @@ export const useStore = create<AppState>()(
           };
         });
       },
+
+      restoreBanks: (restoredBanks) => {
+        set((state) => {
+          const restoredIds = new Set(restoredBanks.map((bank) => bank.id));
+          return {
+            banks: [
+              ...state.banks.filter((bank) => !restoredIds.has(bank.id)),
+              ...restoredBanks,
+            ],
+            activeBankId: restoredBanks.at(-1)?.id || state.activeBankId,
+          };
+        });
+      },
       
       getActiveQuestions: () => {
         const state = get();
@@ -189,7 +203,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'qblearn-storage',
-      version: 1,
+      version: 2,
       migrate: (persistedState) => {
         const state = persistedState as AppState;
         if (!state || !Array.isArray(state.banks)) return state;

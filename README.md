@@ -14,6 +14,37 @@ kiểm tra ngẫu nhiên.
 - Chế độ học có phản hồi đúng/sai.
 - Tạo bài kiểm tra ngẫu nhiên với số câu và thời gian tùy chỉnh.
 - Lưu dữ liệu trực tiếp trong `localStorage`, không cần backend.
+- Có thể cài dưới dạng PWA trên iPhone, iPad, Android và máy tính.
+- Sao lưu/khôi phục toàn bộ bộ đề bằng một file JSON để chuyển thiết bị.
+
+## Sử dụng bản đã host
+
+Mở địa chỉ:
+
+```text
+https://qbao0111.github.io/qb-learn/
+```
+
+### Cài trên iPhone/iPad
+
+1. Mở địa chỉ trên bằng **Safari**.
+2. Bấm nút **Chia sẻ**.
+3. Chọn **Thêm vào Màn hình chính**.
+4. Mở **QB Learn** từ biểu tượng vừa được tạo.
+
+Ứng dụng sẽ chạy ở chế độ toàn màn hình và lưu dữ liệu ngay trên thiết bị.
+
+### Chuyển các bộ đề từ máy tính sang iPhone
+
+1. Trên máy tính, vào **Tổng quan → Quản lý bộ đề → Sao lưu**.
+2. Chuyển file `qb-learn-backup-YYYY-MM-DD.json` sang iPhone bằng AirDrop,
+   iCloud Drive, Google Drive hoặc ứng dụng Tệp.
+3. Trên iPhone, mở QB Learn đã cài, vào **Tổng quan → Khôi phục**.
+4. Chọn file JSON. Toàn bộ bộ đề, đáp án, giải thích và hình ảnh sẽ xuất hiện
+   trên iPhone.
+
+Dữ liệu được lưu riêng trên từng thiết bị. Thao tác sao lưu/khôi phục giúp chuyển
+một bản đầy đủ giữa các thiết bị mà không cần tài khoản hoặc máy chủ dữ liệu.
 
 ## Công nghệ
 
@@ -104,11 +135,17 @@ npm test
 # Type-check và tạo production build
 npm run build
 
+# Tạo production build dành cho GitHub Pages
+npm run build:pages
+
 # Xem thử production build
 npm run preview
 ```
 
 Production build được tạo trong thư mục `dist/`.
+
+Mỗi lần push nhánh `main`, workflow `.github/workflows/deploy-pages.yml` sẽ chạy
+test, build PWA và cập nhật GitHub Pages tự động.
 
 ## Kiểm tra trước khi đóng góp
 

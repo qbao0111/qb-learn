@@ -74,19 +74,6 @@ export function LearnMode() {
     }
   }, [isAnswered]);
 
-  // Auto advance to next question when answered correctly
-  useEffect(() => {
-    let timer: any;
-    if (isAnswered && isCorrect) {
-      timer = setTimeout(() => {
-        session.nextQuestion();
-      }, 950);
-    }
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
-  }, [isAnswered, isCorrect, session]);
-
   const { currentQuestion } = session;
   const correctKeys = useMemo(() => {
     return currentQuestion ? getQuestionAnswerKeys(currentQuestion) : [];
@@ -148,12 +135,12 @@ export function LearnMode() {
     });
   }, []);
 
-  // Keyboard shortcut listener (1-4, A-D, Space, Enter)
+  // Keyboard shortcut listener (1-4, A-D, Space)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) return;
 
-      if ((e.code === 'Space' || e.key === 'Enter') && isAnswered) {
+      if (e.code === 'Space' && isAnswered) {
         e.preventDefault();
         session.nextQuestion();
         return;
@@ -490,6 +477,7 @@ export function LearnMode() {
                     className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center gap-1.5 flex-shrink-0 shadow-xs"
                   >
                     <span>Tiếp tục</span>
+                    <span className="text-white/75 text-[11px] font-normal">(Space)</span>
                     <ArrowRight size={14} />
                   </button>
                 </div>
@@ -539,7 +527,7 @@ export function LearnMode() {
                   >
                     <span>Tiếp tục</span>
                     <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-                    <span className="text-white/75 text-xs font-normal ml-1">(Phím Space hoặc Enter)</span>
+                    <span className="text-white/75 text-xs font-normal ml-1">(Phím Space)</span>
                   </button>
                 </div>
               )}

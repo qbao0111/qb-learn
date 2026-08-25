@@ -15,9 +15,10 @@ import {
   suggestBankName,
 } from '../lib/import-bank';
 import { downloadQuizletPdf } from '../lib/quizlet-pdf-export';
+import { downloadBanksBackup, readBanksBackup } from '../lib/data-backup';
 
 export function Overview() {
-  const { banks, activeBankId, setActiveBank, addBank, deleteBank } = useStore();
+  const { banks, activeBankId, setActiveBank, addBank, deleteBank, restoreBanks } = useStore();
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState('');
@@ -28,6 +29,22 @@ export function Overview() {
   const [exportingBankId, setExportingBankId] = useState<string | null>(null);
   const [exportError, setExportError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const backupInputRef = useRef<HTMLInputElement>(null);
+
+  const handleRestoreBackup = async (file?: File) => {
+    if (!file) return;
+    try {
+      const restoredBanks = await readBanksBackup(file);
+      restoreBanks(restoredBanks);
+      setStatusType('success');
+      setStatus(`Đã khôi phục ${restoredBanks.length} bộ đề từ bản sao lưu.`);
+    } catch (error) {
+      setStatusType('error');
+      setStatus(error instanceof Error ? error.message : 'Không thể đọc file sao lưu.');
+    } finally {
+      if (backupInputRef.current) backupInputRef.current.value = '';
+    }
+  };
 
   const applySelectedFile = (file?: File) => {
     if (!file) return;
@@ -242,8 +259,36 @@ export function Overview() {
 
       {/* Bank Manager */}
       <section className="bg-surface rounded-2xl border border-border overflow-hidden shadow-sm">
-        <div className="p-6 border-b border-border">
-          <h3 className="text-xl font-bold text-text">Quản lý bộ đề</h3>
+        <div className="flex items-center justify-between gap-4 p-6 border-b border-border">
+          <div>
+            <h3 className="text-xl font-bold text-text">Quản lý bộ đề</h3>
+            <p className="mt-1 text-sm text-text-muted">Sao lưu để chuyển toàn bộ bộ đề sang thiết bị khác.</p>
+          </div>
+          <div className="flex shrink-0 flex-wrap justify-end gap-2">
+            <input
+              ref={backupInputRef}
+              type="file"
+              accept="application/json,.json"
+              className="hidden"
+              onChange={(event) => void handleRestoreBackup(event.target.files?.[0])}
+            />
+            <button
+              type="button"
+              onClick={() => backupInputRef.current?.click()}
+              className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+            >
+              <Upload size={18} aria-hidden="true" />
+              <span>Khôi phục</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => downloadBanksBackup(banks)}
+              className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+            >
+              <Download size={18} aria-hidden="true" />
+              <span>Sao lưu</span>
+            </button>
+          </div>
         </div>
         
         {exportError && (

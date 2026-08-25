@@ -379,4 +379,12 @@ test('restores Vietnamese dot-below glyphs corrupted by a PDF font', () => {
     'ạ ặ ậ ẹ ệ ị ọ ộ ợ ụ ự ỵ',
   );
   assert.equal(cleanText('Liên hệ: quiz@example.com'), 'Liên hệ: quiz@example.com');
+  assert.equal(
+    cleanText('Cho;n thi; trường, giá tri; sử du;ng, quyết đi;nh, mo;i người'),
+    'Chọn thị trường, giá trị sử dụng, quyết định, mọi người',
+  );
+  assert.equal(
+    cleanText('(1) sản xuất; (2) tiêu dùng; (3) cao nhất'),
+    '(1) sản xuất; (2) tiêu dùng; (3) cao nhất',
+  );
 });
