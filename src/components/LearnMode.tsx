@@ -23,11 +23,13 @@ import { QuestionImage } from './QuestionImage';
 export function LearnMode() {
   const activeQuestions = useActiveQuestions();
   const [settings, setSettings] = useState<{start: number, end: number, shuffle: boolean, shuffleOptions?: boolean} | null>(null);
+  const [retryQuestions, setRetryQuestions] = useState<typeof activeQuestions | null>(null);
   const [starredIds, setStarredIds] = useState<Set<number>>(new Set());
 
   // Derive the session questions based on settings
   const sessionQuestions = useMemo(() => {
     if (!settings) return [];
+    if (retryQuestions) return retryQuestions;
     let q = activeQuestions.slice(settings.start - 1, settings.end);
     if (settings.shuffle) {
       const newArr = [...q];
@@ -38,7 +40,7 @@ export function LearnMode() {
       q = newArr;
     }
     return q;
-  }, [activeQuestions, settings]);
+  }, [activeQuestions, retryQuestions, settings]);
 
   const session = useLearnSession(sessionQuestions, settings?.shuffleOptions);
   
@@ -190,7 +192,10 @@ export function LearnMode() {
     return (
       <StudySetup 
         totalQuestions={activeQuestions.length} 
-        onStart={setSettings} 
+        onStart={(nextSettings) => {
+          setRetryQuestions(null);
+          setSettings(nextSettings);
+        }}
         title="Thiết lập Chế độ Học"
         storageKey="learn_settings"
         showShuffleOptions={true}
@@ -217,7 +222,7 @@ export function LearnMode() {
       <motion.div 
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="mx-auto flex max-w-xl flex-col items-center justify-center px-6 py-10 text-center"
+        className="mx-auto flex w-full max-w-4xl flex-col items-center px-4 py-8 text-center sm:px-6 sm:py-10"
       >
         <div className="mb-6 flex size-20 items-center justify-center rounded-3xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-white shadow-lg shadow-emerald-500/25">
           <Trophy size={42} />
@@ -244,10 +249,98 @@ export function LearnMode() {
             <p className="text-2xl sm:text-3xl font-extrabold text-primary">{accuracy}%</p>
           </div>
         </div>
+
+        {session.mistakes.length > 0 && (
+          <section className="mb-8 w-full text-left" aria-labelledby="learn-mistakes-title">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="mb-1 text-xs font-bold uppercase tracking-wider text-rose-500">
+                  Cần xem lại
+                </p>
+                <h3 id="learn-mistakes-title" className="text-xl font-extrabold text-text sm:text-2xl">
+                  {session.mistakes.length} câu bạn đã trả lời sai
+                </h3>
+                <p className="mt-1 text-sm text-text-secondary">
+                  Xem lại lựa chọn của bạn và đáp án đúng trước khi thử lại nhé.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedKeys([]);
+                  setIsAnswered(false);
+                  setIsCorrect(false);
+                  setRetryQuestions(session.mistakes.map(({ question }) => question));
+                }}
+                className="btn btn-primary min-h-11 w-full shrink-0 px-5 font-bold shadow-md shadow-primary/25 sm:w-auto"
+              >
+                <RefreshCw size={16} />
+                Làm lại {session.mistakes.length} câu sai
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {session.mistakes.map(({ question, selectedKeys: wrongKeys, correctKeys: answerKeys }, index) => {
+                const wrongAnswers = question.options.filter((option) => wrongKeys.includes(option.key));
+                const correctAnswers = question.options.filter((option) => answerKeys.includes(option.key));
+
+                return (
+                  <article key={question.id} className="elevated-card overflow-hidden rounded-2xl p-4 sm:p-5">
+                    <div className="mb-3 flex items-start gap-3">
+                      <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-xs font-extrabold text-rose-700 dark:bg-rose-950/60 dark:text-rose-300">
+                        {index + 1}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-bold leading-relaxed text-text sm:text-base">
+                          {question.question}
+                        </p>
+                        {question.imageDataUrl && (
+                          <div className="mt-3 max-h-48 max-w-md overflow-hidden rounded-xl border border-border bg-surface-2">
+                            <QuestionImage src={question.imageDataUrl} />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="grid gap-2.5 sm:grid-cols-2">
+                      <div className="rounded-xl border border-rose-200 bg-rose-50/70 p-3 dark:border-rose-900 dark:bg-rose-950/30">
+                        <span className="mb-1.5 flex items-center gap-1.5 text-xs font-bold text-rose-700 dark:text-rose-300">
+                          <XCircle size={14} /> Câu trả lời của bạn
+                        </span>
+                        <p className="text-sm leading-relaxed text-rose-950 dark:text-rose-100">
+                          {wrongAnswers.length > 0
+                            ? wrongAnswers.map((option) => `${option.key}. ${option.text}`).join(' · ')
+                            : 'Chưa chọn đáp án'}
+                        </p>
+                      </div>
+                      <div className="rounded-xl border border-emerald-300 bg-emerald-50/80 p-3 dark:border-emerald-900 dark:bg-emerald-950/30">
+                        <span className="mb-1.5 flex items-center gap-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-300">
+                          <CheckCircle2 size={14} /> Đáp án đúng
+                        </span>
+                        <p className="text-sm font-medium leading-relaxed text-emerald-950 dark:text-emerald-100">
+                          {correctAnswers.map((option) => `${option.key}. ${option.text}`).join(' · ')}
+                        </p>
+                      </div>
+                    </div>
+
+                    {question.explanation && (
+                      <div className="mt-2.5 rounded-xl border border-border bg-surface-2 p-3 text-sm leading-relaxed text-text-secondary">
+                        <span className="font-bold text-text">Giải thích: </span>{question.explanation}
+                      </div>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+        )}
         
         <div className="flex w-full gap-3 sm:w-auto">
           <button 
-            onClick={() => setSettings(null)}
+            onClick={() => {
+              setRetryQuestions(null);
+              setSettings(null);
+            }}
             className="btn btn-secondary flex-1 px-6 py-3 font-semibold sm:flex-initial"
           >
             Học phạm vi khác

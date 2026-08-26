@@ -1,12 +1,14 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { Question } from '../store';
 import { areAnswerSetsEqual, getQuestionAnswerKeys } from '../lib/answer-utils';
+import { recordLearnMistake, type LearnMistake } from '../lib/learn-review';
 
 export function useLearnSession(questions: Question[], shuffleOptions: boolean = false) {
   const [learningQueue, setLearningQueue] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
   const [stats, setStats] = useState({ correct: 0, incorrect: 0 });
+  const [mistakes, setMistakes] = useState<LearnMistake[]>([]);
 
   // Initialize session
   useEffect(() => {
@@ -55,6 +57,7 @@ export function useLearnSession(questions: Question[], shuffleOptions: boolean =
       setCurrentIndex(0);
       setIsFinished(false);
       setStats({ correct: 0, incorrect: 0 });
+      setMistakes([]);
     }
   }, [questions, shuffleOptions]);
 
@@ -73,6 +76,7 @@ export function useLearnSession(questions: Question[], shuffleOptions: boolean =
       setStats(prev => ({ ...prev, correct: prev.correct + 1 }));
     } else {
       setStats(prev => ({ ...prev, incorrect: prev.incorrect + 1 }));
+      setMistakes((previous) => recordLearnMistake(previous, currentQuestion, selectedKeys));
       
       // Chèn lại câu hỏi sai vào vị trí sau đó vài câu (ví dụ cách 3 câu)
       setLearningQueue(prev => {
@@ -99,6 +103,7 @@ export function useLearnSession(questions: Question[], shuffleOptions: boolean =
     currentQuestion,
     isFinished,
     stats,
+    mistakes,
     answerQuestion,
     nextQuestion,
     totalCurrentRound: learningQueue.length,
