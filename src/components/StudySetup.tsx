@@ -46,48 +46,51 @@ export function StudySetup({ totalQuestions, onStart, title, storageKey, showShu
   };
 
   return (
-    <div className="flex min-h-[60vh] w-full max-w-lg flex-col items-center justify-center p-4">
-      <div className="elevated-card w-full p-5 sm:p-8">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="rounded-2xl bg-primary-subtle p-3 text-primary">
+    <div className="flex min-h-[55vh] w-full max-w-lg flex-col items-center justify-center p-4">
+      <div className="elevated-card w-full p-6 sm:p-8 rounded-3xl">
+        <div className="flex items-center gap-3.5 mb-6">
+          <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             <Settings2 size={24} />
           </div>
-          <h2 className="text-2xl font-bold leading-tight text-text">{title}</h2>
+          <div>
+            <h2 className="text-2xl font-bold leading-tight text-text">{title}</h2>
+            <p className="text-xs text-text-muted">Tổng cộng {totalQuestions} câu hỏi có sẵn</p>
+          </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-5">
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-text-secondary">Phạm vi câu hỏi (Tổng số: {totalQuestions})</label>
-            <div className="flex items-center gap-4">
-              <div className="flex-1">
+            <label className="text-sm font-semibold text-text">Phạm vi câu hỏi</label>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
                 <span className="text-xs text-text-muted mb-1 block">Từ câu:</span>
                 <input
                   type="text"
                   inputMode="numeric"
                   value={start}
                   onChange={(e) => setStart(e.target.value.replace(/\D/g, ''))}
-                  className="input px-4 py-3"
+                  className="input px-4 py-2.5 bg-surface text-center font-bold"
                 />
               </div>
-              <div className="flex-1">
+              <div>
                 <span className="text-xs text-text-muted mb-1 block">Đến câu:</span>
                 <input
                   type="text"
                   inputMode="numeric"
                   value={end}
                   onChange={(e) => setEnd(e.target.value.replace(/\D/g, ''))}
-                  className="input px-4 py-3"
+                  className="input px-4 py-2.5 bg-surface text-center font-bold"
                 />
               </div>
             </div>
           </div>
 
-          <label className="choice-card flex cursor-pointer items-center justify-between p-4">
+          <label className="choice-card flex cursor-pointer items-center justify-between p-3.5 sm:p-4 rounded-2xl">
             <div className="flex items-center gap-3">
-              <div className={`rounded-xl p-2 ${shuffle ? 'bg-primary text-white' : 'bg-surface-2 text-text-muted'}`}>
+              <div className={`rounded-xl p-2 transition-colors ${shuffle ? 'bg-primary text-white' : 'bg-surface-2 text-text-muted'}`}>
                 <Shuffle size={18} />
               </div>
-              <span className="font-semibold text-text">Đảo vị trí câu hỏi</span>
+              <span className="font-semibold text-sm sm:text-base text-text">Xáo trộn câu hỏi</span>
             </div>
             <div className="relative">
               <input
@@ -96,18 +99,18 @@ export function StudySetup({ totalQuestions, onStart, title, storageKey, showShu
                 onChange={(e) => setShuffle(e.target.checked)}
                 className="sr-only"
               />
-              <div className={`block h-8 w-14 rounded-full transition-colors ${shuffle ? 'bg-primary' : 'bg-surface-2'}`}></div>
-              <div className={`absolute left-1 top-1 h-6 w-6 rounded-full bg-white shadow-sm transition-transform ${shuffle ? 'translate-x-6' : ''}`}></div>
+              <div className={`block h-7 w-12 rounded-full transition-colors ${shuffle ? 'bg-primary' : 'bg-surface-3'}`}></div>
+              <div className={`absolute left-0.5 top-0.5 h-6 w-6 rounded-full bg-white shadow-sm transition-transform ${shuffle ? 'translate-x-5' : ''}`}></div>
             </div>
           </label>
 
           {showShuffleOptions && (
-            <label className="choice-card flex cursor-pointer items-center justify-between p-4">
+            <label className="choice-card flex cursor-pointer items-center justify-between p-3.5 sm:p-4 rounded-2xl">
               <div className="flex items-center gap-3">
-                <div className={`rounded-xl p-2 ${shuffleOptions ? 'bg-primary text-white' : 'bg-surface-2 text-text-muted'}`}>
+                <div className={`rounded-xl p-2 transition-colors ${shuffleOptions ? 'bg-primary text-white' : 'bg-surface-2 text-text-muted'}`}>
                   <Shuffle size={18} />
                 </div>
-                <span className="font-semibold text-text">Đảo đáp án (A, B, C, D)</span>
+                <span className="font-semibold text-sm sm:text-base text-text">Xáo trộn vị trí đáp án (A, B, C, D)</span>
               </div>
               <div className="relative">
                 <input
@@ -116,21 +119,22 @@ export function StudySetup({ totalQuestions, onStart, title, storageKey, showShu
                   onChange={(e) => setShuffleOptions(e.target.checked)}
                   className="sr-only"
                 />
-                <div className={`block h-8 w-14 rounded-full transition-colors ${shuffleOptions ? 'bg-primary' : 'bg-surface-2'}`}></div>
-                <div className={`absolute left-1 top-1 h-6 w-6 rounded-full bg-white shadow-sm transition-transform ${shuffleOptions ? 'translate-x-6' : ''}`}></div>
+                <div className={`block h-7 w-12 rounded-full transition-colors ${shuffleOptions ? 'bg-primary' : 'bg-surface-3'}`}></div>
+                <div className={`absolute left-0.5 top-0.5 h-6 w-6 rounded-full bg-white shadow-sm transition-transform ${shuffleOptions ? 'translate-x-5' : ''}`}></div>
               </div>
             </label>
           )}
 
           <button
             onClick={handleStart}
-            className="btn btn-primary mt-4 w-full py-4 text-base"
+            className="btn btn-primary mt-2 w-full py-3.5 text-base font-bold shadow-md shadow-primary/25"
           >
-            <span>Bắt đầu</span>
-            <ArrowRight size={20} />
+            <span>Bắt đầu học</span>
+            <ArrowRight size={18} />
           </button>
         </div>
       </div>
     </div>
   );
 }
+

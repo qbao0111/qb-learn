@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useActiveQuestions } from '../hooks/useActiveQuestions';
 import { Flashcard3D } from './Flashcard3D';
 import { StudySetup, type StudySettings } from './StudySetup';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, ArrowLeft, ArrowRight, CheckCircle2, Sparkles } from 'lucide-react';
 
 // Helper to shuffle array
 function shuffleArray<T>(array: T[]): T[] {
@@ -54,8 +54,9 @@ export function FlashcardMode() {
 
   if (activeQuestions.length === 0) {
     return (
-      <div className="text-center mt-20 text-text-muted">
-        Không có câu hỏi nào. Vui lòng import bộ đề mới.
+      <div className="mx-auto flex min-h-[50vh] max-w-md flex-col items-center justify-center text-center p-6">
+        <p className="text-base font-semibold text-text-muted">Không có câu hỏi nào trong bộ đề.</p>
+        <p className="mt-1 text-xs text-text-secondary">Vui lòng tạo hoặc nhập bộ đề mới ở Trang chủ.</p>
       </div>
     );
   }
@@ -76,9 +77,9 @@ export function FlashcardMode() {
 
   if (sessionQuestions.length === 0) {
     return (
-      <div className="text-center mt-20 text-text-muted">
-        Không có câu hỏi nào trong phạm vi đã chọn.
-        <button onClick={() => setSettings(null)} className="block mx-auto mt-4 text-primary hover:underline">
+      <div className="mx-auto flex min-h-[50vh] max-w-md flex-col items-center justify-center text-center p-6">
+        <p className="text-base font-semibold text-text-muted">Không có câu hỏi nào trong phạm vi đã chọn.</p>
+        <button onClick={() => setSettings(null)} className="btn btn-primary mt-4 px-5">
           Quay lại thiết lập
         </button>
       </div>
@@ -86,58 +87,75 @@ export function FlashcardMode() {
   }
 
   const activeQuestion = sessionQuestions[flashIndex];
-
   const isFinished = flashIndex === sessionQuestions.length - 1;
+  const progressPct = ((flashIndex + 1) / sessionQuestions.length) * 100;
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col items-center pb-10">
-      {/* Progress */}
-      <div className="mb-6 flex w-full items-center justify-between gap-3 sm:mb-8">
-        <span className="badge badge-primary shrink-0">{flashIndex + 1} / {sessionQuestions.length}</span>
-        <div className="h-2 flex-1 overflow-hidden rounded-full bg-surface-2">
+    <div className="mx-auto flex w-full max-w-5xl flex-col items-center pb-12">
+      {/* Progress & Setup Header */}
+      <div className="mb-4 flex w-full items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <span className="badge badge-primary">
+            <Sparkles size={13} /> Thẻ {flashIndex + 1} / {sessionQuestions.length}
+          </span>
+        </div>
+
+        <div className="h-2 flex-1 max-w-md overflow-hidden rounded-full bg-surface-2 border border-border/50">
           <div 
-            className="h-full bg-primary rounded-full transition-all duration-300"
-            style={{ width: `${((flashIndex + 1) / sessionQuestions.length) * 100}%` }}
+            className="h-full bg-primary rounded-full transition-all duration-300 ease-out"
+            style={{ width: `${progressPct}%` }}
           />
         </div>
+
         <button 
           onClick={() => setSettings(null)}
-          className="btn btn-ghost shrink-0 px-3"
+          className="btn btn-ghost min-h-9 px-2.5 text-xs text-text-muted hover:text-text"
           title="Thiết lập lại"
         >
-          <RefreshCw size={18} />
-          <span className="hidden sm:inline">Thiết lập lại</span>
+          <RefreshCw size={14} />
+          <span className="hidden sm:inline">Cài đặt</span>
         </button>
       </div>
 
-      {/* Card */}
+      {/* 3D Flashcard */}
       {activeQuestion && <Flashcard3D question={activeQuestion} index={flashIndex} />}
       
       {/* Controls */}
-      <div className="mt-10 flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center">
+      <div className="mt-6 flex w-full flex-col items-center justify-center gap-4 sm:flex-row sm:gap-6">
         <button 
           onClick={handlePrev}
           disabled={flashIndex === 0}
-          className="btn btn-secondary px-6 disabled:cursor-not-allowed disabled:opacity-50"
+          className="btn btn-secondary w-full px-6 py-3 sm:w-auto font-semibold"
         >
-          Câu trước <span className="text-text-muted text-sm font-normal">(←)</span>
+          <ArrowLeft size={16} />
+          <span>Thẻ trước</span>
+          <kbd className="hidden sm:inline text-xs opacity-60 font-mono">←</kbd>
         </button>
+
+        <span className="text-xs font-medium text-text-muted hidden md:inline">
+          Nhấn thẻ hoặc phím <kbd className="px-1.5 py-0.5 rounded bg-surface-2 border border-border text-[11px] font-mono">Space</kbd> để lật
+        </span>
+
         {isFinished ? (
           <button 
             onClick={() => setSettings(null)}
-            className="btn bg-emerald-600 px-6 text-white shadow-[0_8px_18px_rgba(5,150,105,0.18)] hover:bg-emerald-700"
+            className="btn btn-primary w-full px-8 py-3 sm:w-auto font-bold bg-emerald-600 hover:bg-emerald-700 border-emerald-600 text-white shadow-md shadow-emerald-600/25"
           >
-            Hoàn thành
+            <CheckCircle2 size={18} />
+            <span>Hoàn thành vòng học</span>
           </button>
         ) : (
           <button 
             onClick={handleNext}
-            className="btn btn-primary px-6"
+            className="btn btn-primary w-full px-6 py-3 sm:w-auto font-bold shadow-md shadow-primary/25"
           >
-            Câu tiếp <span className="text-sm font-normal text-white/75">(→)</span>
+            <span>Thẻ tiếp theo</span>
+            <kbd className="hidden sm:inline text-xs opacity-75 font-mono text-white">→</kbd>
+            <ArrowRight size={16} />
           </button>
         )}
       </div>
     </div>
   );
 }
+

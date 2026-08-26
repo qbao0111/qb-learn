@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Question } from '../store';
 import { useActiveQuestions } from '../hooks/useActiveQuestions';
-import { CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { CheckCircle2, XCircle, Clock, ListChecks, ArrowRight, RotateCcw, Award } from 'lucide-react';
 import { playSound } from '../lib/sound';
 import { areAnswerSetsEqual, getQuestionAnswerKeys } from '../lib/answer-utils';
 import { QuestionImage } from './QuestionImage';
@@ -50,6 +50,19 @@ export function ExamMode() {
     setExamState('running');
   };
 
+  const handleSelectOption = (questionId: number, optionKey: string, isMultiple: boolean) => {
+    setAnswers(prev => {
+      const current = prev[questionId] || [];
+      if (!isMultiple) {
+        return { ...prev, [questionId]: [optionKey] };
+      }
+      const next = current.includes(optionKey)
+        ? current.filter(k => k !== optionKey)
+        : [...current, optionKey];
+      return { ...prev, [questionId]: next };
+    });
+  };
+
   const handleSubmit = () => {
     if (examState !== 'running') return;
     
@@ -73,53 +86,69 @@ export function ExamMode() {
 
   if (activeQuestions.length === 0) {
     return (
-      <div className="text-center mt-20 text-text-muted">
-        Không có câu hỏi nào. Vui lòng import bộ đề mới.
+      <div className="mx-auto flex min-h-[50vh] max-w-md flex-col items-center justify-center text-center p-6">
+        <p className="text-base font-semibold text-text-muted">Không có câu hỏi nào trong bộ đề.</p>
+        <p className="mt-1 text-xs text-text-secondary">Vui lòng tạo hoặc nhập bộ đề mới ở Trang chủ.</p>
       </div>
     );
   }
 
   if (examState === 'setup') {
     return (
-      <div className="elevated-card mx-auto mt-8 w-full max-w-xl p-5 sm:p-8">
-        <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold leading-tight text-text">
-          Thiết lập bài kiểm tra
-        </h2>
-        
-        <div className="space-y-6">
+      <div className="elevated-card mx-auto mt-6 w-full max-w-xl p-6 sm:p-7 rounded-2xl">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="flex size-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <ListChecks size={22} />
+          </div>
           <div>
-            <label className="mb-2 block text-sm font-semibold text-text-secondary">
-              Số lượng câu hỏi (tối đa {maxQuestions})
-            </label>
+            <h2 className="text-xl font-bold leading-tight text-text">
+              Thiết lập bài kiểm tra
+            </h2>
+            <p className="text-xs text-text-muted">Kiểm tra kiến thức trắc nghiệm với thời gian bấm giờ.</p>
+          </div>
+        </div>
+        
+        <div className="space-y-4">
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-semibold text-text">
+                Số lượng câu hỏi
+              </label>
+              <span className="text-xs font-semibold text-primary">Tối đa {maxQuestions} câu</span>
+            </div>
             <input 
               type="number" 
               min="1" 
               max={maxQuestions}
               value={numQuestions}
-              onChange={(e) => setNumQuestions(Number(e.target.value))}
-              className="input px-4 py-3"
+              onChange={(e) => setNumQuestions(Math.min(maxQuestions, Math.max(1, Number(e.target.value))))}
+              className="input px-3.5 py-2 text-sm bg-surface"
             />
           </div>
           
           <div>
-            <label className="mb-2 block text-sm font-semibold text-text-secondary">
-              Thời gian làm bài (Phút)
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-semibold text-text">
+                Thời gian làm bài (phút)
+              </label>
+              <span className="text-xs text-text-muted">1 - 180 phút</span>
+            </div>
             <input 
               type="number" 
               min="1" 
               max="180"
               value={timeLimit}
-              onChange={(e) => setTimeLimit(Number(e.target.value))}
-              className="input px-4 py-3"
+              onChange={(e) => setTimeLimit(Math.max(1, Number(e.target.value)))}
+              className="input px-3.5 py-2 text-sm bg-surface"
             />
           </div>
           
           <button 
             onClick={startExam}
-            className="btn btn-primary mt-4 w-full py-4 text-base"
+            className="btn btn-primary mt-3 w-full py-2.5 text-sm font-semibold shadow-md shadow-primary/25"
           >
-            Bắt đầu làm bài
+            <span>Bắt đầu làm bài</span>
+            <ArrowRight size={16} />
           </button>
         </div>
       </div>
@@ -133,35 +162,38 @@ export function ExamMode() {
     const s = timeSpent % 60;
 
     return (
-      <div className="mx-auto w-full max-w-3xl space-y-8 pb-12">
-        <div className="elevated-card p-6 text-center sm:p-8">
-          <h2 className="mb-2 text-3xl font-bold leading-tight">Kết quả bài thi</h2>
-          <p className="mb-8 text-text-secondary">Thời gian hoàn thành: {m} phút {s} giây</p>
+      <div className="mx-auto w-full max-w-3xl space-y-6 pb-16">
+        <div className="elevated-card p-6 text-center sm:p-7 rounded-2xl">
+          <div className="mx-auto mb-3.5 flex size-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-primary to-indigo-500 text-white shadow-md shadow-primary/25">
+            <Award size={32} />
+          </div>
+          <h2 className="mb-1 text-xl sm:text-2xl font-bold text-text">Kết quả bài thi</h2>
+          <p className="mb-6 text-xs text-text-secondary">Thời gian hoàn thành: {m} phút {s} giây</p>
           
-          <div className="mb-8 flex items-center justify-center gap-8 sm:gap-12">
-            <div>
-              <div className="mb-2 text-5xl font-bold text-primary">{score}/{examQuestions.length}</div>
-              <div className="font-medium text-text-muted">Câu đúng</div>
+          <div className="mb-7 flex items-center justify-center gap-4 sm:gap-8">
+            <div className="rounded-2xl bg-surface-2 p-3.5 min-w-[110px]">
+              <div className="mb-0.5 text-2xl sm:text-3xl font-bold text-primary">{score}/{examQuestions.length}</div>
+              <div className="text-xs font-medium text-text-muted">Câu đúng</div>
             </div>
-            <div className="h-20 w-px bg-border"></div>
-            <div>
-                <div className={`mb-2 text-5xl font-bold ${percent >= 80 ? 'text-emerald-600 dark:text-emerald-400' : percent >= 50 ? 'text-orange-500 dark:text-orange-400' : 'text-red-500 dark:text-red-400'}`}>
+            <div className="rounded-2xl bg-surface-2 p-3.5 min-w-[110px]">
+              <div className={`mb-0.5 text-2xl sm:text-3xl font-bold ${percent >= 80 ? 'text-emerald-600 dark:text-emerald-400' : percent >= 50 ? 'text-amber-500' : 'text-rose-500'}`}>
                 {percent}%
               </div>
-              <div className="font-medium text-text-muted">Độ chính xác</div>
+              <div className="text-xs font-medium text-text-muted">Độ chính xác</div>
             </div>
           </div>
           
           <button 
             onClick={() => setExamState('setup')}
-            className="btn btn-secondary px-8 py-3"
+            className="btn btn-primary px-6 py-2 text-xs sm:text-sm font-semibold shadow-sm shadow-primary/25"
           >
-            Làm bài mới
+            <RotateCcw size={15} />
+            <span>Làm bài kiểm tra mới</span>
           </button>
         </div>
         
-        <div className="space-y-6">
-          <h3 className="text-xl font-bold">Chi tiết đáp án</h3>
+        <div className="space-y-3.5">
+          <h3 className="text-lg font-bold text-text px-1">Chi tiết từng câu hỏi</h3>
           {examQuestions.map((q, idx) => {
             const selected = answers[q.id] ?? [];
             const correctKeys = getQuestionAnswerKeys(q);
@@ -174,44 +206,50 @@ export function ExamMode() {
               .join(' · ');
             
             return (
-                <div key={q.id} className={`rounded-2xl border p-5 sm:p-6 ${isCorrect ? 'border-emerald-200 bg-emerald-50/30 dark:border-emerald-800 dark:bg-emerald-950/30' : 'border-red-200 bg-red-50/30 dark:border-red-800 dark:bg-red-950/30'}`}>
-                <div className="flex gap-4">
-                  <div className="mt-1">
-                    {isCorrect ? <CheckCircle2 className="text-emerald-600" /> : <XCircle className="text-red-500" />}
+              <div key={q.id} className={`rounded-xl border p-4 sm:p-5 transition-colors ${isCorrect ? 'border-emerald-200 bg-emerald-50/40 dark:border-emerald-800 dark:bg-emerald-950/20' : 'border-rose-200 bg-rose-50/40 dark:border-rose-800 dark:bg-rose-950/20'}`}>
+                <div className="flex gap-3">
+                  <div className="mt-0.5 shrink-0">
+                    {isCorrect ? (
+                      <CheckCircle2 className="text-emerald-600 dark:text-emerald-400" size={20} />
+                    ) : (
+                      <XCircle className="text-rose-500 dark:text-rose-400" size={20} />
+                    )}
                   </div>
-                  <div className="flex-1">
-                    <p className="font-bold mb-4">Câu {idx + 1}: {q.question}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm sm:text-base text-text mb-2.5">Câu {idx + 1}: {q.question}</p>
                     
                     {q.imageDataUrl && (
-                      <div className="mb-4">
+                      <div className="mb-3 max-h-40">
                         <QuestionImage src={q.imageDataUrl} compact />
                       </div>
                     )}
-                    <div className="space-y-2 mb-4">
+
+                    <div className="space-y-1.5 mb-2.5">
                       {q.options.map(opt => {
                         const isThisSelected = selected.includes(opt.key);
                         const isThisCorrect = correctKeys.includes(opt.key);
                         
-                        let optClass = "p-3 rounded-lg border text-sm ";
+                        let optClass = "p-2.5 rounded-lg border text-xs sm:text-sm flex items-center gap-2 ";
                         if (isThisCorrect) {
-                            optClass += "bg-emerald-50 border-emerald-300 text-emerald-900 font-semibold dark:bg-emerald-950/60 dark:border-emerald-700 dark:text-emerald-100";
+                          optClass += "bg-emerald-100/70 border-emerald-300 text-emerald-950 font-medium dark:bg-emerald-950/60 dark:border-emerald-700 dark:text-emerald-100";
                         } else if (isThisSelected && !isThisCorrect) {
-                          optClass += "bg-red-100 border-red-300 text-red-900 dark:bg-red-950/60 dark:border-red-700 dark:text-red-100";
+                          optClass += "bg-rose-100/70 border-rose-300 text-rose-950 font-medium dark:bg-rose-950/60 dark:border-rose-700 dark:text-rose-100";
                         } else {
-                          optClass += "bg-surface border-border opacity-60";
+                          optClass += "bg-surface border-border opacity-60 text-text-secondary";
                         }
                         
                         return (
                           <div key={opt.key} className={optClass}>
-                            <strong>{opt.key}.</strong> {opt.text}
+                            <span className="font-semibold text-xs shrink-0">{opt.key}.</span>
+                            <span className="font-normal">{opt.text}</span>
                           </div>
                         );
                       })}
                     </div>
                     
                     {!isCorrect && (
-                      <div className="bg-surface-2 p-3 rounded-lg border border-border text-sm">
-                        <span className="font-semibold text-text-muted">Đáp án đúng:</span> {correctAnswerText}
+                      <div className="bg-surface p-2.5 rounded-lg border border-border text-xs text-text-secondary">
+                        <span className="font-semibold text-emerald-600 dark:text-emerald-400 mr-1">Đáp án đúng:</span> {correctAnswerText}
                       </div>
                     )}
                   </div>
@@ -230,85 +268,93 @@ export function ExamMode() {
   const answeredCount = Object.values(answers).filter((keys) => keys.length > 0).length;
 
   return (
-    <div className="relative mx-auto w-full max-w-3xl pb-24">
+    <div className="relative mx-auto w-full max-w-3xl pb-20">
       {/* Sticky Header */}
-      <div className="sticky top-0 z-10 mb-8 flex items-center justify-between gap-3 border-b border-border bg-background/88 py-4 backdrop-blur-md">
-        <div className="font-semibold text-text-muted">
-          Đã làm: <span className="text-primary font-bold">{answeredCount}/{examQuestions.length}</span>
+      <div className="sticky top-0 z-10 mb-5 flex items-center justify-between gap-3 border-b border-border bg-surface/90 px-4 py-3 backdrop-blur-md rounded-xl shadow-xs">
+        <div className="text-xs sm:text-sm font-medium text-text-muted">
+          Đã làm: <span className="text-primary font-semibold text-xs sm:text-sm">{answeredCount}/{examQuestions.length}</span>
         </div>
-        <div className={`flex items-center gap-2 font-bold text-lg ${timeLeft < 300 ? 'text-red-500 animate-pulse' : 'text-text'}`}>
-          <Clock size={20} />
-          {m.toString().padStart(2, '0')}:{s.toString().padStart(2, '0')}
+        <div className={`flex items-center gap-1.5 font-bold text-sm sm:text-base ${timeLeft < 300 ? 'text-rose-500 animate-pulse' : 'text-text'}`}>
+          <Clock size={17} />
+          <span>{m.toString().padStart(2, '0')}:{s.toString().padStart(2, '0')}</span>
         </div>
         <button 
           onClick={() => {
-            if (confirm('Bạn có chắc chắn muốn nộp bài?')) handleSubmit();
+            if (confirm('Bạn có chắc chắn muốn nộp bài sớm?')) handleSubmit();
           }}
-          className="btn btn-primary px-5 py-2"
+          className="btn btn-primary px-3.5 py-1.5 text-xs font-semibold shadow-xs"
         >
           Nộp bài
         </button>
       </div>
-      
-      {/* Questions List */}
-      <div className="space-y-8">
+
+      {/* Questions list */}
+      <div className="space-y-4">
         {examQuestions.map((q, idx) => {
+          const selected = answers[q.id] || [];
           const correctKeys = getQuestionAnswerKeys(q);
           const isMultiple = correctKeys.length > 1;
-          const selectedKeys = answers[q.id] ?? [];
 
           return (
-          <div key={q.id} className="elevated-card p-5 sm:p-8">
-            <h3 className="mb-6 text-xl font-bold leading-relaxed text-text">
-              Câu {idx + 1}: <span className="font-normal">{q.question}</span>
-            </h3>
-            {q.imageDataUrl && (
-              <div className="mb-6">
-                <QuestionImage src={q.imageDataUrl} />
+            <div key={q.id} className="elevated-card p-4 sm:p-5 rounded-xl space-y-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <span className="badge badge-muted text-[11px] mb-1.5">
+                    Câu {idx + 1}/{examQuestions.length} {isMultiple && '• Chọn nhiều đáp án'}
+                  </span>
+                  <h3 className="text-sm sm:text-base font-semibold text-text leading-relaxed">
+                    {q.question}
+                  </h3>
+                </div>
               </div>
-            )}
-            {isMultiple && (
-              <p className="badge badge-primary mb-4">
-                Chọn {correctKeys.length} đáp án
-              </p>
-            )}
-            <div className="space-y-3">
-              {q.options.map((opt) => {
-                const isSelected = selectedKeys.includes(opt.key);
-                return (
-                  <label 
-                    key={opt.key}
-                    className={`choice-card flex cursor-pointer items-center gap-4 p-4 ${isSelected ? 'border-primary bg-primary-subtle text-primary' : 'text-text'}`}
-                  >
-                    <input 
-                      type={isMultiple ? 'checkbox' : 'radio'}
-                      name={`q-${q.id}`} 
-                      value={opt.key}
-                      checked={isSelected}
-                      onChange={() => setAnswers((previous) => {
-                        if (!isMultiple) {
-                          return { ...previous, [q.id]: [opt.key] };
-                        }
-                        const current = previous[q.id] ?? [];
-                        const next = current.includes(opt.key)
-                          ? current.filter((key) => key !== opt.key)
-                          : [...current, opt.key];
-                        return { ...previous, [q.id]: next };
-                      })}
-                      className="h-5 w-5 accent-primary focus:ring-primary"
-                    />
-                    <div className="flex-1 text-base">
-                      <strong className="mr-2 text-primary">{opt.key}.</strong>
-                      {opt.text}
-                    </div>
-                  </label>
-                );
-              })}
+
+              {q.imageDataUrl && (
+                <div className="max-h-40">
+                  <QuestionImage src={q.imageDataUrl} compact />
+                </div>
+              )}
+
+              <div className="space-y-2">
+                {q.options.map((opt) => {
+                  const isChecked = selected.includes(opt.key);
+                  return (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => handleSelectOption(q.id, opt.key, isMultiple)}
+                      className={`w-full text-left p-2.5 sm:p-3 rounded-xl border transition-all text-xs sm:text-sm font-normal flex items-center gap-2.5 ${
+                        isChecked 
+                          ? 'border-primary ring-2 ring-primary/20 bg-primary-subtle text-primary font-medium shadow-xs' 
+                          : 'border-border bg-surface hover:border-primary/40 hover:bg-surface-hover text-text'
+                      }`}
+                    >
+                      <span className={`size-6 rounded-md flex items-center justify-center font-semibold text-xs shrink-0 ${
+                        isChecked ? 'bg-primary text-white' : 'bg-surface-2 border border-border text-text-muted'
+                      }`}>
+                        {opt.key}
+                      </span>
+                      <span className="flex-1 leading-relaxed break-words">{opt.text}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
           );
         })}
+      </div>
+
+      <div className="mt-7 flex justify-center">
+        <button 
+          onClick={() => {
+            if (confirm('Bạn có chắc chắn muốn nộp bài?')) handleSubmit();
+          }}
+          className="btn btn-primary px-8 py-2.5 text-sm font-semibold shadow-md shadow-primary/25"
+        >
+          Nộp bài kiểm tra
+        </button>
       </div>
     </div>
   );
 }
+
+
