@@ -60,6 +60,8 @@ export function LearnMode() {
       const scrollableParent = containerRef.current.closest('.overflow-y-auto');
       if (scrollableParent) {
         scrollableParent.scrollTo({ top: 0, behavior: 'instant' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'instant' });
       }
     }
   }, [session.currentQuestion]);
@@ -227,7 +229,7 @@ export function LearnMode() {
           Bạn đã ôn tập toàn bộ các câu hỏi trong mục tiêu đã chọn. Hãy duy trì thói quen mỗi ngày!
         </p>
         
-        <div className="card mb-8 grid w-full grid-cols-3 gap-3 p-4 sm:gap-4 sm:p-6">
+        <div className="elevated-card mb-8 grid w-full grid-cols-3 gap-3 p-4 sm:gap-4 sm:p-6">
           <div className="rounded-xl bg-background p-3">
             <p className="mb-1 text-xs font-bold text-text-muted">Đúng lần đầu</p>
             <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{session.stats.correct}</p>
@@ -327,7 +329,7 @@ export function LearnMode() {
           transition={{ duration: 0.22, ease: "easeOut" }}
           className="flex flex-1 flex-col"
         >
-          <div className="card relative mb-3.5 p-4 sm:p-5">
+          <div className="elevated-card relative mb-3.5 p-4 sm:p-5">
             <div className="mb-3 flex items-center justify-between gap-4">
               <span className="text-xs font-bold text-text-muted">
                 Thuật ngữ #{currentQuestion.id}
@@ -486,7 +488,7 @@ export function LearnMode() {
               ) : (
                 /* Quizlet Learning Comparison Box (Don't worry, you are learning) */
                 <div className="space-y-3.5">
-                  <div className="card overflow-hidden">
+                  <div className="elevated-card overflow-hidden">
                     <div className="flex items-center gap-2 border-b border-rose-200/70 bg-rose-50/80 px-4 py-2.5 text-xs font-bold text-rose-900 sm:text-sm">
                       <Lightbulb size={16} className="text-rose-600" />
                       Đừng lo lắng, hãy cùng ghi nhớ đáp án đúng:

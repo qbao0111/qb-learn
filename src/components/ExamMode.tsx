@@ -81,7 +81,7 @@ export function ExamMode() {
 
   if (examState === 'setup') {
     return (
-      <div className="card mx-auto mt-8 w-full max-w-xl p-5 sm:p-8">
+      <div className="elevated-card mx-auto mt-8 w-full max-w-xl p-5 sm:p-8">
         <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold leading-tight text-text">
           Thiết lập bài kiểm tra
         </h2>
@@ -134,7 +134,7 @@ export function ExamMode() {
 
     return (
       <div className="mx-auto w-full max-w-3xl space-y-8 pb-12">
-        <div className="card p-6 text-center sm:p-8">
+        <div className="elevated-card p-6 text-center sm:p-8">
           <h2 className="mb-2 text-3xl font-bold leading-tight">Kết quả bài thi</h2>
           <p className="mb-8 text-text-secondary">Thời gian hoàn thành: {m} phút {s} giây</p>
           
@@ -258,7 +258,7 @@ export function ExamMode() {
           const selectedKeys = answers[q.id] ?? [];
 
           return (
-          <div key={q.id} className="card p-5 sm:p-8">
+          <div key={q.id} className="elevated-card p-5 sm:p-8">
             <h3 className="mb-6 text-xl font-bold leading-relaxed text-text">
               Câu {idx + 1}: <span className="font-normal">{q.question}</span>
             </h3>

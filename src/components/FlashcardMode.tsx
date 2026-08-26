@@ -90,7 +90,7 @@ export function FlashcardMode() {
   const isFinished = flashIndex === sessionQuestions.length - 1;
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-5xl flex-col items-center">
+    <div className="mx-auto flex w-full max-w-5xl flex-col items-center pb-10">
       {/* Progress */}
       <div className="mb-6 flex w-full items-center justify-between gap-3 sm:mb-8">
         <span className="badge badge-primary shrink-0">{flashIndex + 1} / {sessionQuestions.length}</span>
