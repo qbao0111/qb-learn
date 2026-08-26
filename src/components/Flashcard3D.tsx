@@ -85,7 +85,7 @@ export function Flashcard3D({ question, index }: Flashcard3DProps) {
     .join(' · ');
 
   return (
-    <div className="w-full flex justify-center perspective-1200 py-8">
+    <div className="flex w-full justify-center py-5 perspective-1200 sm:py-8">
       <motion.div
         ref={cardRef}
         onMouseMove={handleMouseMove}
@@ -100,7 +100,7 @@ export function Flashcard3D({ question, index }: Flashcard3DProps) {
           minHeight: 'clamp(380px, 54vh, 580px)' 
         }}
         className="relative w-full max-w-4xl cursor-pointer"
-        whileHover={{ scale: 1.02 }}
+        whileHover={{ scale: 1.01 }}
         whileTap={{ scale: 0.98 }}
         role="button"
         tabIndex={0}
@@ -120,16 +120,16 @@ export function Flashcard3D({ question, index }: Flashcard3DProps) {
         >
           {/* FRONT FACE */}
           <div 
-            className="absolute inset-0 w-full h-full bg-surface border border-border rounded-2xl shadow-md p-8 flex flex-col items-center justify-center backface-hidden"
+            className="absolute inset-0 flex h-full w-full flex-col items-center justify-center rounded-2xl border border-border bg-surface p-5 shadow-[var(--shadow-card)] backface-hidden sm:p-8"
             style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
           >
-            <div className="absolute top-4 left-6 text-sm text-text-muted font-medium">
+            <div className="absolute left-5 top-4 text-sm font-semibold text-text-muted sm:left-6">
               Thẻ {index + 1} • Nguồn #{question.id}
             </div>
-            <div className="text-sm font-semibold tracking-wider text-primary mb-6 bg-primary/10 px-3 py-1 rounded-full uppercase">
+            <div className="badge badge-primary mb-6">
               Câu hỏi
             </div>
-            <h3 className="text-2xl font-bold text-center text-text leading-relaxed max-w-2xl mb-8">
+            <h3 className="mb-8 max-w-2xl text-center text-xl font-semibold leading-relaxed text-text sm:text-2xl">
               {question.question}
             </h3>
             {question.imageDataUrl && (
@@ -137,9 +137,9 @@ export function Flashcard3D({ question, index }: Flashcard3DProps) {
                 <QuestionImage src={question.imageDataUrl} compact />
               </div>
             )}
-            <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-3xl">
+            <ul className="grid w-full max-w-3xl grid-cols-1 gap-3 md:grid-cols-2">
               {question.options.map((opt, i) => (
-                <li key={i} className="bg-surface-2 p-4 rounded-xl text-center text-sm md:text-base border border-transparent">
+                <li key={i} className="rounded-xl border border-border bg-background p-4 text-center text-sm leading-6 text-text-secondary md:text-base">
                   <strong className="text-primary mr-2">{opt.key}.</strong> {opt.text}
                 </li>
               ))}
@@ -148,20 +148,20 @@ export function Flashcard3D({ question, index }: Flashcard3DProps) {
 
           {/* BACK FACE */}
           <div 
-            className="absolute inset-0 w-full h-full bg-surface-2 border border-border rounded-2xl shadow-xl p-8 flex flex-col items-center justify-center backface-hidden"
+            className="absolute inset-0 flex h-full w-full flex-col items-center justify-center rounded-2xl border border-border bg-surface p-5 shadow-[var(--shadow-card-hover)] backface-hidden sm:p-8"
             style={{ 
               backfaceVisibility: "hidden", 
               WebkitBackfaceVisibility: "hidden",
               transform: "rotateY(180deg)"
             }}
           >
-            <div className="absolute top-4 left-6 text-sm text-text-muted font-medium">
+            <div className="absolute left-5 top-4 text-sm font-semibold text-text-muted sm:left-6">
               Thẻ {index + 1} • Nguồn #{question.id}
             </div>
-            <div className="text-sm font-semibold tracking-wider text-green-600 mb-6 bg-green-100 px-3 py-1 rounded-full uppercase dark:bg-green-950/60 dark:text-green-300">
+            <div className="badge badge-success mb-6 dark:bg-emerald-950/60 dark:text-emerald-300">
               Đáp án đúng
             </div>
-            <h3 className="text-2xl font-bold text-center text-green-700 leading-relaxed max-w-2xl mb-4 dark:text-green-300">
+            <h3 className="mb-4 max-w-2xl text-center text-xl font-bold leading-relaxed text-emerald-700 dark:text-emerald-300 sm:text-2xl">
               {correctAnswerText}
             </h3>
             <p className="text-text-muted text-center max-w-xl">
