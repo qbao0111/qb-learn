@@ -3,6 +3,7 @@ import {
   Layers, 
   GraduationCap, 
   ListChecks, 
+  Moon,
   Sun,
   Layout,
   Volume2,
@@ -19,6 +20,13 @@ import { useStore } from './store';
 import { startCloudSync } from './lib/cloud-sync';
 
 type AppMode = 'overview' | 'flashcards' | 'learn' | 'exam' | 'manage';
+type Theme = 'light' | 'dark';
+
+const THEME_STORAGE_KEY = 'qb-learn-theme';
+
+function getInitialTheme(): Theme {
+  return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+}
 
 const navigation = [
   { id: 'overview', label: 'Tổng quan', mobileLabel: 'Tổng quan', icon: Layout },
@@ -43,10 +51,21 @@ const pageTitles: Record<AppMode, string> = {
 
 function App() {
   const [mode, setMode] = useState<AppMode>('overview');
+  const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const soundEnabled = useStore(state => state.soundEnabled);
   const toggleSound = useStore(state => state.toggleSound);
 
   useEffect(() => startCloudSync(), []);
+
+  useEffect(() => {
+    const isDark = theme === 'dark';
+    document.documentElement.classList.toggle('dark', isDark);
+    document.documentElement.style.colorScheme = theme;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark ? '#11111b' : '#6d3df5');
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(current => current === 'dark' ? 'light' : 'dark');
 
   return (
     <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-background">
@@ -94,14 +113,25 @@ function App() {
               <p className="truncate text-xs leading-tight text-text-muted">{pageTitles[mode]}</p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={toggleSound}
-            className={`flex size-11 items-center justify-center rounded-full transition-colors ${soundEnabled ? 'text-primary active:bg-primary/10' : 'text-text-muted active:bg-surface-2'}`}
-            aria-label={soundEnabled ? 'Tắt âm thanh' : 'Bật âm thanh'}
-          >
-            {soundEnabled ? <Volume2 size={21} /> : <VolumeX size={21} />}
-          </button>
+          <div className="flex items-center">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="flex size-11 items-center justify-center rounded-full text-text-muted transition-colors active:bg-surface-2 active:text-text"
+              aria-label={theme === 'dark' ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}
+              title={theme === 'dark' ? 'Giao diện sáng' : 'Giao diện tối'}
+            >
+              {theme === 'dark' ? <Sun size={21} /> : <Moon size={21} />}
+            </button>
+            <button
+              type="button"
+              onClick={toggleSound}
+              className={`flex size-11 items-center justify-center rounded-full transition-colors ${soundEnabled ? 'text-primary active:bg-primary/10' : 'text-text-muted active:bg-surface-2'}`}
+              aria-label={soundEnabled ? 'Tắt âm thanh' : 'Bật âm thanh'}
+            >
+              {soundEnabled ? <Volume2 size={21} /> : <VolumeX size={21} />}
+            </button>
+          </div>
         </header>
 
         {/* HEADER */}
@@ -115,8 +145,14 @@ function App() {
             >
               {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
             </button>
-            <button className="p-2 text-text-muted hover:text-text rounded-full hover:bg-surface-2 transition-colors">
-              <Sun size={20} />
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="rounded-full p-2 text-text-muted transition-colors hover:bg-surface-2 hover:text-text"
+              aria-label={theme === 'dark' ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}
+              title={theme === 'dark' ? 'Giao diện sáng' : 'Giao diện tối'}
+            >
+              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </button>
           </div>
         </header>
@@ -135,7 +171,7 @@ function App() {
 
       {/* MOBILE NAVIGATION */}
       <nav
-        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-surface/95 px-1 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgba(15,23,42,0.06)] backdrop-blur-xl md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-surface/95 px-1 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_8px_rgba(15,23,42,0.06)] backdrop-blur-xl md:hidden dark:shadow-none"
         aria-label="Điều hướng chính"
       >
         {navigation.map((item) => {

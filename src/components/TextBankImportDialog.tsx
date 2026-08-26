@@ -266,7 +266,7 @@ export function TextBankImportDialog({ open, onClose }: TextBankImportDialogProp
                     <p className="text-xs text-text-muted">{parsed.rowCount} dòng được nhận diện</p>
                   </div>
                   <div className="flex items-center gap-2 text-xs font-semibold">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-emerald-700">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
                       <CheckCircle2 size={14} /> {prepared.report.usableMultipleChoice} hợp lệ
                     </span>
                     {parsed.issues.length > 0 && (
@@ -295,7 +295,7 @@ export function TextBankImportDialog({ open, onClose }: TextBankImportDialogProp
                         {question.options.map((option) => (
                           <span
                             key={option.key}
-                            className={`rounded-lg px-2 py-1 text-xs ${question.answerKeys?.includes(option.key) ? 'bg-emerald-50 font-semibold text-emerald-700' : 'bg-surface-2 text-text-muted'}`}
+                            className={`rounded-lg px-2 py-1 text-xs ${question.answerKeys?.includes(option.key) ? 'bg-emerald-50 font-semibold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300' : 'bg-surface-2 text-text-muted'}`}
                           >
                             {option.key}. {option.text}
                           </span>
@@ -316,7 +316,7 @@ export function TextBankImportDialog({ open, onClose }: TextBankImportDialogProp
           </div>
 
           {error && (
-            <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">
+            <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 dark:bg-red-950/60 dark:text-red-300" role="alert">
               {error}
             </p>
           )}

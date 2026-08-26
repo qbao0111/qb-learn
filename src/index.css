@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-background: var(--background);
   --color-surface: var(--surface);
@@ -22,6 +24,17 @@
     --text-muted: #64748b;
     --border: #e2e8f0;
   }
+
+  :root.dark {
+    --background: #11111b;
+    --surface: #181825;
+    --surface-2: #242435;
+    --primary: #a9a4ff;
+    --primary-hover: #c2beff;
+    --text: #f1f1f7;
+    --text-muted: #aaaabd;
+    --border: #343447;
+  }
 }
 
 body {
@@ -33,6 +46,13 @@ body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   overscroll-behavior: none;
+  transition: background-color 180ms ease-out, color 180ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body {
+    transition: none;
+  }
 }
 
 button,

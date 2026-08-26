@@ -158,10 +158,10 @@ export function Flashcard3D({ question, index }: Flashcard3DProps) {
             <div className="absolute top-4 left-6 text-sm text-text-muted font-medium">
               Thẻ {index + 1} • Nguồn #{question.id}
             </div>
-            <div className="text-sm font-semibold tracking-wider text-green-600 mb-6 bg-green-100 px-3 py-1 rounded-full uppercase">
+            <div className="text-sm font-semibold tracking-wider text-green-600 mb-6 bg-green-100 px-3 py-1 rounded-full uppercase dark:bg-green-950/60 dark:text-green-300">
               Đáp án đúng
             </div>
-            <h3 className="text-2xl font-bold text-center text-green-700 leading-relaxed max-w-2xl mb-4">
+            <h3 className="text-2xl font-bold text-center text-green-700 leading-relaxed max-w-2xl mb-4 dark:text-green-300">
               {correctAnswerText}
             </h3>
             <p className="text-text-muted text-center max-w-xl">

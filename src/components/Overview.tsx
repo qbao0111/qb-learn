@@ -284,9 +284,9 @@ export function Overview() {
             aria-live={statusType === 'error' ? 'assertive' : 'polite'}
             className={`mt-4 rounded-xl p-4 text-sm font-medium ${
               statusType === 'error'
-                ? 'bg-red-100 text-red-700'
+                ? 'bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-300'
                 : statusType === 'success'
-                  ? 'bg-green-100 text-green-700'
+                  ? 'bg-green-100 text-green-700 dark:bg-green-950/60 dark:text-green-300'
                   : 'bg-primary/10 text-primary'
             }`}
           >
@@ -299,13 +299,13 @@ export function Overview() {
       {/* Neon Sync */}
       <section className="rounded-2xl border border-border bg-surface p-4 shadow-sm sm:p-6">
         <div className="flex items-start gap-3">
-          <div className={`rounded-xl p-2.5 ${syncState.connected ? 'bg-emerald-50 text-emerald-600' : 'bg-primary/10 text-primary'}`}>
+          <div className={`rounded-xl p-2.5 ${syncState.connected ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-300' : 'bg-primary/10 text-primary'}`}>
             {syncState.connected ? <Cloud size={22} /> : <CloudOff size={22} />}
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-lg font-bold text-text">Đồng bộ Neon</h3>
-              <span className={`rounded-full px-2 py-1 text-xs font-semibold ${syncState.connected ? 'bg-emerald-50 text-emerald-700' : 'bg-surface-2 text-text-muted'}`}>
+              <span className={`rounded-full px-2 py-1 text-xs font-semibold ${syncState.connected ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300' : 'bg-surface-2 text-text-muted'}`}>
                 {syncState.connected ? 'Đã kết nối' : 'Chưa kết nối'}
               </span>
             </div>
@@ -357,7 +357,7 @@ export function Overview() {
             <button
               type="button"
               onClick={disconnectCloudSync}
-              className="min-h-11 rounded-xl border border-border px-4 py-2 text-sm font-semibold text-text-muted transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+              className="min-h-11 rounded-xl border border-border px-4 py-2 text-sm font-semibold text-text-muted transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600 dark:hover:border-red-800 dark:hover:bg-red-950/50 dark:hover:text-red-300"
             >
               Ngắt kết nối
             </button>
@@ -365,7 +365,7 @@ export function Overview() {
         )}
 
         {syncActionError && (
-          <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm font-medium text-red-700" role="alert">
+          <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm font-medium text-red-700 dark:bg-red-950/60 dark:text-red-300" role="alert">
             {syncActionError}
           </p>
         )}
@@ -409,7 +409,7 @@ export function Overview() {
         </div>
         
         {exportError && (
-          <p className="m-4 rounded-xl bg-red-50 px-3 py-2 text-sm font-medium text-red-700" role="alert">
+          <p className="m-4 rounded-xl bg-red-50 px-3 py-2 text-sm font-medium text-red-700 dark:bg-red-950/60 dark:text-red-300" role="alert">
             {exportError}
           </p>
         )}
@@ -457,7 +457,7 @@ export function Overview() {
               {banks.length > 1 && (
                 <button 
                   onClick={() => deleteBank(bank.id)}
-                  className="p-2 text-text-muted hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                  className="p-2 text-text-muted hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors dark:hover:bg-red-950/50 dark:hover:text-red-300"
                   title="Xóa bộ đề"
                 >
                   <Trash2 size={20} />

@@ -230,11 +230,11 @@ export function LearnMode() {
         <div className="w-full bg-surface p-6 rounded-2xl border border-border shadow-sm grid grid-cols-3 gap-4 mb-8">
           <div className="p-3 rounded-xl bg-surface-2">
             <p className="text-xs font-bold text-text-muted uppercase tracking-wider mb-1">Đúng lần đầu</p>
-            <p className="text-2xl font-black text-emerald-600">{session.stats.correct}</p>
+            <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{session.stats.correct}</p>
           </div>
           <div className="p-3 rounded-xl bg-surface-2">
             <p className="text-xs font-bold text-text-muted uppercase tracking-wider mb-1">Đã ôn lại</p>
-            <p className="text-2xl font-black text-orange-500">{session.stats.incorrect}</p>
+            <p className="text-2xl font-black text-orange-500 dark:text-orange-400">{session.stats.incorrect}</p>
           </div>
           <div className="p-3 rounded-xl bg-surface-2">
             <p className="text-xs font-bold text-text-muted uppercase tracking-wider mb-1">Độ chính xác</p>
@@ -287,7 +287,7 @@ export function LearnMode() {
 
           <div className="flex items-center gap-2.5">
             <div className="flex items-center gap-1.5">
-              <div className="flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/60 shadow-xs">
+              <div className="flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/60 shadow-xs dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
                 <Check size={13} className="stroke-[3]" /> {session.stats.correct}
               </div>
               <div className="flex items-center gap-1 text-xs font-bold text-rose-700 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200/60 shadow-xs">
@@ -386,7 +386,7 @@ export function LearnMode() {
                   : "border-border bg-surface hover:border-primary/70 hover:bg-primary/5 text-text shadow-xs";
               } else {
                 if (isActuallyCorrect) {
-                  cardStyle += "border-emerald-500 bg-emerald-50/80 text-emerald-950 font-semibold shadow-xs";
+                  cardStyle += "border-emerald-500 bg-emerald-50/80 text-emerald-950 font-semibold shadow-xs dark:border-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-100";
                 } else if (isSelected && !isActuallyCorrect) {
                   cardStyle += "border-rose-500 bg-rose-50/80 text-rose-950 font-semibold shadow-xs";
                 } else {
@@ -460,14 +460,14 @@ export function LearnMode() {
             >
               {isCorrect ? (
                 /* Correct Celebration Banner */
-                <div className="p-3 sm:p-3.5 rounded-xl bg-emerald-50/90 border border-emerald-300 flex items-center justify-between gap-3 text-emerald-950 shadow-xs">
+                <div className="p-3 sm:p-3.5 rounded-xl bg-emerald-50/90 border border-emerald-300 flex items-center justify-between gap-3 text-emerald-950 shadow-xs dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-100">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
                       <Check size={18} className="stroke-[3]" />
                     </div>
                     <div>
-                      <strong className="block text-sm sm:text-base font-extrabold text-emerald-900">Chính xác! Làm rất tốt.</strong>
-                      <span className="text-xs sm:text-sm text-emerald-800 line-clamp-1">
+                      <strong className="block text-sm sm:text-base font-extrabold text-emerald-900 dark:text-emerald-100">Chính xác! Làm rất tốt.</strong>
+                      <span className="text-xs sm:text-sm text-emerald-800 line-clamp-1 dark:text-emerald-300">
                         {correctOptionObjects.map(o => `${o.key}. ${o.text}`).join(' · ')}
                       </span>
                     </div>
@@ -504,15 +504,15 @@ export function LearnMode() {
                       )}
 
                       {/* Correct answer */}
-                      <div className="p-2.5 sm:p-3 rounded-xl bg-emerald-50/80 border border-emerald-300">
-                        <span className="block text-xs font-bold text-emerald-700 uppercase tracking-wider mb-0.5">
+                      <div className="p-2.5 sm:p-3 rounded-xl bg-emerald-50/80 border border-emerald-300 dark:border-emerald-800 dark:bg-emerald-950/60">
+                        <span className="block text-xs font-bold text-emerald-700 uppercase tracking-wider mb-0.5 dark:text-emerald-300">
                           ✅ Đáp án đúng:
                         </span>
-                        <p className="text-xs sm:text-sm font-bold text-emerald-950">
+                        <p className="text-xs sm:text-sm font-bold text-emerald-950 dark:text-emerald-100">
                           {correctOptionObjects.map(o => `${o.key}. ${o.text}`).join(' · ')}
                         </p>
                         {currentQuestion.answer && (
-                          <p className="mt-1 text-xs text-emerald-800 font-medium border-t border-emerald-200/80 pt-1">
+                          <p className="mt-1 text-xs text-emerald-800 font-medium border-t border-emerald-200/80 pt-1 dark:border-emerald-800 dark:text-emerald-300">
                             Ghi chú: {currentQuestion.answer}
                           </p>
                         )}
