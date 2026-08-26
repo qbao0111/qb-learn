@@ -119,8 +119,8 @@ export function Flashcard3D({ question, index }: Flashcard3DProps) {
           style={{ transformStyle: "preserve-3d" }}
         >
           {/* FRONT FACE */}
-          <div 
-            className="absolute inset-0 flex h-full w-full flex-col items-center justify-center rounded-2xl border border-border bg-surface p-5 shadow-[var(--shadow-card)] backface-hidden sm:p-8"
+          <div
+            className="elevated-card absolute inset-0 flex h-full w-full flex-col items-center justify-center p-5 backface-hidden sm:p-8"
             style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
           >
             <div className="absolute left-5 top-4 text-sm font-semibold text-text-muted sm:left-6">
@@ -139,7 +139,7 @@ export function Flashcard3D({ question, index }: Flashcard3DProps) {
             )}
             <ul className="grid w-full max-w-3xl grid-cols-1 gap-3 md:grid-cols-2">
               {question.options.map((opt, i) => (
-                <li key={i} className="rounded-xl border border-border bg-background p-4 text-center text-sm leading-6 text-text-secondary md:text-base">
+                <li key={i} className="rounded-xl border border-border/80 bg-background p-4 text-center text-sm leading-6 text-text-secondary transition-colors hover:border-primary/30 hover:bg-primary-subtle/45 md:text-base">
                   <strong className="text-primary mr-2">{opt.key}.</strong> {opt.text}
                 </li>
               ))}
@@ -147,8 +147,8 @@ export function Flashcard3D({ question, index }: Flashcard3DProps) {
           </div>
 
           {/* BACK FACE */}
-          <div 
-            className="absolute inset-0 flex h-full w-full flex-col items-center justify-center rounded-2xl border border-border bg-surface p-5 shadow-[var(--shadow-card-hover)] backface-hidden sm:p-8"
+          <div
+            className="elevated-card absolute inset-0 flex h-full w-full flex-col items-center justify-center p-5 backface-hidden sm:p-8"
             style={{ 
               backfaceVisibility: "hidden", 
               WebkitBackfaceVisibility: "hidden",

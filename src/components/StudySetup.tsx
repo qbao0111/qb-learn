@@ -46,8 +46,8 @@ export function StudySetup({ totalQuestions, onStart, title, storageKey, showShu
   };
 
   return (
-    <div className="flex h-full w-full max-w-lg flex-col items-center justify-center p-4">
-      <div className="card w-full p-5 sm:p-8">
+    <div className="flex min-h-[60vh] w-full max-w-lg flex-col items-center justify-center p-4">
+      <div className="elevated-card w-full p-5 sm:p-8">
         <div className="flex items-center gap-3 mb-6">
           <div className="rounded-2xl bg-primary-subtle p-3 text-primary">
             <Settings2 size={24} />

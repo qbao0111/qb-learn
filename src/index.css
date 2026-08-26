@@ -62,23 +62,16 @@
     --shadow-card: 0 1px 2px rgb(0 0 0 / 0.18), 0 12px 30px rgb(0 0 0 / 0.18);
     --shadow-card-hover: 0 2px 5px rgb(0 0 0 / 0.2), 0 16px 38px rgb(0 0 0 / 0.24);
   }
-
-  :root.dark {
-    --background: #11111b;
-    --surface: #181825;
-    --surface-2: #242435;
-    --primary: #a9a4ff;
-    --primary-hover: #c2beff;
-    --text: #f1f1f7;
-    --text-muted: #aaaabd;
-    --border: #343447;
-  }
 }
 
+html,
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100dvh;
+}
+
+body {
   background-color: var(--background);
   color: var(--text);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -87,6 +80,10 @@ body {
   text-rendering: optimizeLegibility;
   overscroll-behavior: none;
   transition: background-color 180ms ease-out, color 180ms ease-out;
+}
+
+#root {
+  min-height: 100dvh;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -116,9 +113,24 @@ button:disabled {
 
 @layer components {
   .app-shell {
-    background:
-      linear-gradient(180deg, rgb(255 255 255 / 0.78), rgb(246 248 252 / 0.78)),
-      var(--background);
+    background: var(--background);
+  }
+
+  .elevated-card {
+    border: 1px solid color-mix(in srgb, var(--border) 74%, transparent);
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow: var(--shadow-card);
+  }
+
+  .subtle-panel {
+    border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+    border-radius: 18px;
+    background: var(--surface-2);
+  }
+
+  .plain-section {
+    background: transparent;
   }
 
   .card {
@@ -143,7 +155,7 @@ button:disabled {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    border-radius: 12px;
+    border-radius: 10px;
     padding: 0.625rem 1rem;
     font-size: 0.875rem;
     font-weight: 650;
@@ -178,7 +190,7 @@ button:disabled {
     border: 1px solid var(--primary);
     background: var(--primary);
     color: #ffffff;
-    box-shadow: 0 8px 18px rgb(66 85 255 / 0.18);
+    box-shadow: none;
   }
 
   .btn-primary:hover {
@@ -192,13 +204,13 @@ button:disabled {
   }
 
   .btn-secondary {
-    border: 1px solid var(--border);
+    border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
     background: var(--surface);
     color: var(--text);
   }
 
   .btn-secondary:hover {
-    border-color: rgb(66 85 255 / 0.34);
+    border-color: color-mix(in srgb, var(--primary) 24%, var(--border));
     background: var(--primary-subtle);
     color: var(--primary);
   }
@@ -233,7 +245,7 @@ button:disabled {
     min-width: 40px;
     align-items: center;
     justify-content: center;
-    border-radius: 12px;
+    border-radius: 10px;
     color: var(--text-muted);
     transition: background-color 180ms ease, color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
   }
@@ -246,7 +258,7 @@ button:disabled {
   .input {
     min-height: 42px;
     width: 100%;
-    border-radius: 12px;
+    border-radius: 10px;
     border: 1px solid var(--border);
     background: var(--surface);
     color: var(--text);

@@ -68,31 +68,31 @@ function App() {
   const toggleTheme = () => setTheme(current => current === 'dark' ? 'light' : 'dark');
 
   return (
-    <div className="app-shell flex h-dvh min-h-0 w-full max-w-full overflow-hidden">
+    <div className="app-shell min-h-dvh w-full max-w-full md:flex">
       {/* SIDEBAR */}
-      <aside className="hidden w-64 flex-shrink-0 flex-col border-r border-border bg-surface/96 md:flex">
-        <div className="px-5 pb-5 pt-6">
+      <aside className="sticky top-0 hidden h-dvh w-56 flex-shrink-0 flex-col border-r border-border bg-surface/96 md:flex">
+        <div className="px-4 pb-4 pt-5">
           <div className="flex items-center gap-3">
-            <div className="rounded-2xl bg-primary p-2.5 text-white shadow-[0_10px_22px_rgba(66,85,255,0.2)]">
-              <Layers size={23} strokeWidth={2.25} />
+            <div className="rounded-xl bg-primary p-2 text-white">
+              <Layers size={21} strokeWidth={2.25} />
             </div>
-            <div>
-              <h1 className="text-xl font-bold leading-tight text-text">QB Learn</h1>
+            <div className="min-w-0">
+              <h1 className="truncate text-lg font-bold leading-tight text-text">QB Learn</h1>
               <p className="text-xs font-medium text-text-muted">Học gọn hơn mỗi ngày</p>
             </div>
           </div>
         </div>
 
-        <nav className="flex-1 space-y-1.5 px-3" aria-label="Điều hướng chính">
+        <nav className="flex-1 space-y-1 px-2.5" aria-label="Điều hướng chính">
           {navigation.map((item) => {
             const Icon = item.icon;
             return (
               <div key={item.id}>
-                {item.id === 'manage' && <div className="my-3 border-t border-border" />}
+                {item.id === 'manage' && <div className="my-3 border-t border-border/70" />}
                 <button
                   type="button"
                   onClick={() => setMode(item.id)}
-                  className={`flex min-h-11 w-full items-center gap-3 rounded-xl px-3.5 text-sm font-semibold transition-all duration-200 ${mode === item.id ? 'bg-primary-subtle text-primary shadow-[inset_0_0_0_1px_rgba(66,85,255,0.08)]' : 'text-text-secondary hover:bg-surface-hover hover:text-text'}`}
+                  className={`relative flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-sm font-semibold transition-all duration-200 ${mode === item.id ? 'bg-primary-subtle text-primary shadow-[inset_0_0_0_1px_rgba(66,85,255,0.08)] before:absolute before:left-0 before:top-2 before:h-7 before:w-1 before:rounded-full before:bg-primary' : 'text-text-secondary hover:bg-surface-hover hover:text-text'}`}
                   aria-current={mode === item.id ? 'page' : undefined}
                 >
                   <Icon size={20} strokeWidth={mode === item.id ? 2.35 : 2} />
@@ -105,9 +105,9 @@ function App() {
       </aside>
 
       {/* MAIN CONTENT */}
-      <main className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
+      <main className="min-w-0 flex-1">
         {/* MOBILE HEADER */}
-        <header className="flex h-14 flex-shrink-0 items-center justify-between border-b border-border bg-surface/96 px-4 pt-[env(safe-area-inset-top)] md:hidden">
+        <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-surface/96 px-4 pt-[env(safe-area-inset-top)] backdrop-blur md:hidden">
           <div className="flex min-w-0 items-center gap-2.5">
             <div className="rounded-xl bg-primary p-1.5 text-white">
               <Layers size={20} />
@@ -139,8 +139,7 @@ function App() {
         </header>
 
         {/* HEADER */}
-        <header className="hidden h-16 flex-shrink-0 items-center justify-between border-b border-border bg-surface/92 px-8 backdrop-blur md:flex">
-          <h2 className="text-lg font-bold text-text">{pageTitles[mode]}</h2>
+        <header className="sticky top-0 z-20 hidden h-16 items-center justify-end border-b border-border bg-surface/90 px-8 backdrop-blur md:flex">
           <div className="flex items-center gap-2">
             <button 
               onClick={toggleSound}
@@ -163,7 +162,7 @@ function App() {
         </header>
 
         {/* CONTENT AREA */}
-        <div className="flex max-w-full flex-1 flex-col items-center overflow-x-hidden overflow-y-auto px-3 py-4 pb-[calc(5.25rem+env(safe-area-inset-bottom))] sm:px-6 md:pb-5">
+        <div className="mx-auto flex w-full max-w-full flex-col overflow-x-hidden px-4 py-6 pb-[calc(5.25rem+env(safe-area-inset-bottom))] sm:px-6 md:pb-10 lg:max-w-[1240px] lg:px-8">
           {mode === 'overview' && <Overview />}
           
           {mode === 'flashcards' && <FlashcardMode />}
@@ -193,7 +192,7 @@ function App() {
               <span className={`flex h-8 w-12 items-center justify-center rounded-full ${active ? 'bg-primary-subtle' : ''}`}>
                 <Icon size={21} strokeWidth={active ? 2.4 : 2} />
               </span>
-              <span className="w-full truncate text-center leading-none">{item.mobileLabel}</span>
+              <span className="w-full text-center leading-tight">{item.mobileLabel}</span>
             </button>
           );
         })}
