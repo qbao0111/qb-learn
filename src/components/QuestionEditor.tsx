@@ -294,47 +294,44 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-3 sm:p-4 backdrop-blur-md"
     >
       <div
-        className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl"
+        className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border border-border bg-surface shadow-2xl"
         role="dialog"
         aria-modal="true"
         aria-labelledby="question-editor-title"
       >
-        <div className="flex items-center justify-between border-b border-border px-6 py-5">
+        <div className="flex items-center justify-between border-b border-border/80 px-6 py-4">
           <div>
-            <p className="mb-1 text-xs font-bold text-primary">
-              Quản lý dữ liệu
-            </p>
-            <h2 id="question-editor-title" className="text-2xl font-bold text-text">
+            <span className="badge badge-primary text-[11px] mb-1">
+              {initialData ? 'Chỉnh sửa' : 'Thêm mới'}
+            </span>
+            <h2 id="question-editor-title" className="text-xl sm:text-2xl font-extrabold text-text">
               {initialData ? 'Sửa câu hỏi' : 'Thêm câu hỏi mới'}
             </h2>
           </div>
           <button
             type="button"
             onClick={onCancel}
-            className="icon-btn"
+            className="icon-btn rounded-xl"
             aria-label="Đóng cửa sổ"
           >
-            <X size={22} />
+            <X size={20} />
           </button>
         </div>
 
-        <div className="flex-1 space-y-6 overflow-y-auto p-6">
+        <div className="flex-1 space-y-6 overflow-y-auto p-5 sm:p-6">
           <section aria-labelledby="image-import-title">
-            <div className="mb-3 flex items-center gap-2">
-              <ImagePlus className="text-primary" size={20} aria-hidden="true" />
+            <div className="mb-2.5 flex items-center gap-2">
+              <ImagePlus className="text-primary" size={18} aria-hidden="true" />
               <h3 id="image-import-title" className="text-sm font-bold text-text">
-                Điền nội dung từ hình ảnh
+                Nhận diện nhanh từ hình ảnh (OCR)
               </h3>
-              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
-                OCR
-              </span>
             </div>
 
             <div
-              className="rounded-2xl border border-dashed border-primary/35 bg-primary-subtle/50 p-4 transition-colors hover:border-primary/60"
+              className="rounded-2xl border border-dashed border-primary/40 bg-primary-subtle/40 p-4 transition-colors hover:border-primary"
               onDragOver={(event) => event.preventDefault()}
               onDrop={handleDrop}
             >
@@ -343,20 +340,20 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
                   <img
                     src={imagePreviewUrl}
                     alt="Ảnh câu hỏi đang được nhận diện"
-                    className="h-24 w-full rounded-xl border border-border bg-surface-2 object-contain sm:w-40"
+                    className="h-24 w-full rounded-xl border border-border bg-surface object-contain sm:w-36"
                   />
                 ) : (
-                  <div className="flex h-24 w-full shrink-0 items-center justify-center rounded-xl border border-border bg-surface sm:w-40">
-                    <ImagePlus size={30} className="text-text-muted" aria-hidden="true" />
+                  <div className="flex h-24 w-full shrink-0 items-center justify-center rounded-xl border border-border bg-surface sm:w-36">
+                    <ImagePlus size={28} className="text-text-muted" aria-hidden="true" />
                   </div>
                 )}
 
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-text">
-                    {imageName || 'Kéo thả ảnh câu hỏi vào đây'}
+                  <p className="truncate text-sm font-bold text-text">
+                    {imageName || 'Kéo thả ảnh chụp câu hỏi vào đây'}
                   </p>
-                  <p className="mt-1 text-xs leading-5 text-text-muted">
-                    Chỉ dùng ảnh này để OCR điền nội dung. Ảnh OCR không được lưu làm ảnh minh hoạ.
+                  <p className="mt-0.5 text-xs text-text-muted">
+                    Hệ thống sẽ tự động đọc nội dung câu hỏi và các lựa chọn A, B, C, D.
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <input
@@ -374,18 +371,18 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
                       type="button"
                       onClick={() => inputRef.current?.click()}
                       disabled={ocrState.type === 'loading'}
-                      className="btn btn-primary min-h-10 px-3.5 py-2 disabled:cursor-wait"
+                      className="btn btn-primary min-h-9 px-3.5 py-1.5 text-xs font-semibold disabled:cursor-wait"
                     >
-                      <Upload size={16} aria-hidden="true" />
+                      <Upload size={14} aria-hidden="true" />
                       Tải ảnh lên
                     </button>
                     <button
                       type="button"
                       onClick={() => void handleClipboardButton()}
                       disabled={ocrState.type === 'loading'}
-                      className="btn btn-secondary min-h-10 px-3.5 py-2 disabled:cursor-wait"
+                      className="btn btn-secondary min-h-9 px-3.5 py-1.5 text-xs font-semibold disabled:cursor-wait"
                     >
-                      <ClipboardPaste size={16} aria-hidden="true" />
+                      <ClipboardPaste size={14} aria-hidden="true" />
                       Dán từ clipboard
                     </button>
                   </div>
@@ -393,7 +390,7 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
               </div>
 
               {ocrState.type === 'loading' && (
-                <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-primary/10">
+                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-primary/20">
                   <div
                     className="h-full rounded-full bg-primary transition-[width] duration-300"
                     style={{ width: `${Math.max(6, ocrState.progress * 100)}%` }}
@@ -401,53 +398,50 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
                 </div>
               )}
               <div
-                className={`mt-3 flex items-center gap-2 text-sm ${
+                className={`mt-2.5 flex items-center gap-2 text-xs font-medium ${
                   ocrState.type === 'error'
-                    ? 'text-red-600 dark:text-red-400'
+                    ? 'text-danger'
                     : ocrState.type === 'success'
-                      ? 'text-emerald-700 dark:text-emerald-300'
+                      ? 'text-emerald-600 dark:text-emerald-400'
                       : 'text-text-muted'
                 }`}
                 role={ocrState.type === 'error' ? 'alert' : 'status'}
                 aria-live="polite"
               >
                 {ocrState.type === 'loading' && (
-                  <LoaderCircle size={16} className="animate-spin" aria-hidden="true" />
+                  <LoaderCircle size={14} className="animate-spin shrink-0" aria-hidden="true" />
                 )}
-                {ocrState.message}
+                <span>{ocrState.message}</span>
               </div>
             </div>
           </section>
 
           <section aria-labelledby="illustration-title">
-            <div className="mb-3 flex items-center gap-2">
-              <ImagePlus className="text-emerald-600 dark:text-emerald-300" size={20} aria-hidden="true" />
+            <div className="mb-2.5 flex items-center gap-2">
+              <ImagePlus className="text-emerald-600 dark:text-emerald-400" size={18} aria-hidden="true" />
               <h3 id="illustration-title" className="text-sm font-bold text-text">
-                Ảnh minh hoạ cho câu hỏi
+                Ảnh minh hoạ cho câu hỏi (tuỳ chọn)
               </h3>
-              <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
-                Tuỳ chọn
-              </span>
             </div>
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/40 p-4 dark:border-emerald-800 dark:bg-emerald-950/30">
+            <div className="rounded-2xl border border-emerald-200/80 bg-emerald-50/40 p-4 dark:border-emerald-800 dark:bg-emerald-950/20">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                 {illustrationPreviewUrl ? (
                   <img
                     src={illustrationPreviewUrl}
                     alt="Ảnh minh hoạ đang gắn với câu hỏi"
-                    className="h-28 w-full rounded-xl border border-emerald-200 bg-surface-2 object-contain p-1 sm:w-44 dark:border-emerald-800"
+                    className="h-24 w-full rounded-xl border border-emerald-200 bg-surface object-contain p-1 sm:w-36 dark:border-emerald-800"
                   />
                 ) : (
-                  <div className="flex h-28 w-full shrink-0 items-center justify-center rounded-xl border border-dashed border-emerald-300 bg-surface-2 sm:w-44 dark:border-emerald-700">
-                    <ImagePlus size={30} className="text-emerald-500" aria-hidden="true" />
+                  <div className="flex h-24 w-full shrink-0 items-center justify-center rounded-xl border border-dashed border-emerald-300 bg-surface sm:w-36 dark:border-emerald-700">
+                    <ImagePlus size={28} className="text-emerald-500" aria-hidden="true" />
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-text">
-                    {illustrationName || 'Chưa có ảnh minh hoạ'}
+                  <p className="truncate text-sm font-bold text-text">
+                    {illustrationName || 'Chưa gắn ảnh minh hoạ'}
                   </p>
-                  <p className="mt-1 text-xs leading-5 text-text-muted">
-                    Ảnh này được lưu và hiển thị trong thẻ ghi nhớ, Học, Kiểm tra và PDF xuất.
+                  <p className="mt-0.5 text-xs text-text-muted">
+                    Ảnh sẽ hiển thị cùng câu hỏi trong Thẻ ghi nhớ, chế độ Học, Kiểm tra và PDF.
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <input
@@ -464,27 +458,27 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
                     <button
                       type="button"
                       onClick={() => illustrationInputRef.current?.click()}
-                      className="btn min-h-10 bg-emerald-600 px-3.5 py-2 text-white hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+                      className="btn min-h-9 bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 shadow-xs"
                     >
-                      <Upload size={16} aria-hidden="true" />
-                      Tải ảnh minh hoạ
+                      <Upload size={14} aria-hidden="true" />
+                      Tải ảnh lên
                     </button>
                     <button
                       type="button"
                       onClick={() => void handleIllustrationClipboard()}
-                        className="btn min-h-10 border border-emerald-200 bg-white px-3.5 py-2 text-emerald-800 hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-emerald-800 dark:bg-surface-2 dark:text-emerald-300 dark:hover:bg-emerald-950/50"
+                      className="btn min-h-9 border border-border bg-surface px-3.5 py-1.5 text-xs font-semibold text-text hover:bg-surface-hover"
                     >
-                      <ClipboardPaste size={16} aria-hidden="true" />
-                      Dán ảnh minh hoạ
+                      <ClipboardPaste size={14} aria-hidden="true" />
+                      Dán từ clipboard
                     </button>
                     {imageDataUrl && (
                       <button
                         type="button"
                         onClick={removeImage}
-                          className="btn btn-danger min-h-10 px-3.5 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 dark:border-red-800 dark:bg-red-950/50 dark:text-red-300 dark:hover:bg-red-950/80"
+                        className="btn btn-danger min-h-9 px-3.5 py-1.5 text-xs font-semibold"
                       >
-                        <X size={16} aria-hidden="true" />
-                        Xoá ảnh minh hoạ
+                        <X size={14} aria-hidden="true" />
+                        Xoá ảnh
                       </button>
                     )}
                   </div>
@@ -494,7 +488,7 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
           </section>
 
           <div>
-            <label htmlFor="question-text" className="mb-2 block text-sm font-semibold text-text">
+            <label htmlFor="question-text" className="mb-2 block text-sm font-bold text-text">
               Nội dung câu hỏi
             </label>
             <textarea
@@ -502,67 +496,70 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
               value={questionText}
               onChange={(event) => setQuestionText(event.target.value)}
               placeholder="Nhập nội dung câu hỏi..."
-              className="input h-28 resize-none px-4 py-3"
+              className="input h-28 resize-none px-4 py-3 bg-surface text-sm leading-relaxed"
             />
           </div>
 
           <fieldset className="space-y-3">
-            <legend className="mb-2 text-sm font-semibold text-text">Các lựa chọn</legend>
-            <div className="mb-3 flex flex-wrap justify-end gap-2">
-              <button
-                type="button"
-                onClick={removeLastOption}
-                disabled={options.length <= 2}
-                className="btn btn-secondary min-h-9 rounded-lg px-2.5 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <Trash2 size={14} aria-hidden="true" />
-                Bớt lựa chọn
-              </button>
-              <button
-                type="button"
-                onClick={addOption}
-                disabled={options.length >= 26}
-                className="btn btn-secondary min-h-9 rounded-lg px-2.5 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <Plus size={14} aria-hidden="true" />
-                Thêm lựa chọn
-              </button>
-            </div>
-            {options.map((option) => (
-              <div key={option.key} className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 font-bold text-primary">
-                  {option.key}
-                </div>
-                <label htmlFor={`option-${option.key}`} className="sr-only">
-                  Lựa chọn {option.key}
-                </label>
-                <input
-                  id={`option-${option.key}`}
-                  type="text"
-                  value={option.text}
-                  onChange={(event) => handleOptionChange(option.key, event.target.value)}
-                  placeholder={`Nhập lựa chọn ${option.key}...`}
-                  className="input flex-1 bg-background px-4 py-2.5"
-                />
+            <div className="flex items-center justify-between">
+              <legend className="text-sm font-bold text-text">Các lựa chọn đáp án</legend>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={removeLastOption}
+                  disabled={options.length <= 2}
+                  className="btn btn-secondary min-h-8 rounded-lg px-2.5 py-1 text-xs disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <Trash2 size={13} aria-hidden="true" />
+                  Bớt lựa chọn
+                </button>
+                <button
+                  type="button"
+                  onClick={addOption}
+                  disabled={options.length >= 26}
+                  className="btn btn-secondary min-h-8 rounded-lg px-2.5 py-1 text-xs disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <Plus size={13} aria-hidden="true" />
+                  Thêm lựa chọn
+                </button>
               </div>
-            ))}
+            </div>
+
+            <div className="space-y-2">
+              {options.map((option) => (
+                <div key={option.key} className="flex items-center gap-2.5">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 font-bold text-xs text-primary">
+                    {option.key}
+                  </div>
+                  <label htmlFor={`option-${option.key}`} className="sr-only">
+                    Lựa chọn {option.key}
+                  </label>
+                  <input
+                    id={`option-${option.key}`}
+                    type="text"
+                    value={option.text}
+                    onChange={(event) => handleOptionChange(option.key, event.target.value)}
+                    placeholder={`Nhập nội dung lựa chọn ${option.key}...`}
+                    className="input flex-1 bg-surface px-3.5 py-2 text-sm"
+                  />
+                </div>
+              ))}
+            </div>
           </fieldset>
 
           <fieldset>
-            <legend className="mb-2 text-sm font-semibold text-text">Chọn đáp án đúng</legend>
-            <p className="mb-3 text-xs text-text-muted">
-              OCR không tự đoán đáp án. Hãy chọn đáp án đúng sau khi kiểm tra nội dung.
-            </p>
-            <p className="mb-3 text-xs font-medium text-primary">
-              Có thể chọn nhiều đáp án đúng.
-            </p>
+            <div className="flex items-center justify-between mb-2">
+              <legend className="text-sm font-bold text-text">Chọn đáp án đúng</legend>
+              <span className="text-xs text-primary font-semibold">Có thể chọn nhiều đáp án</span>
+            </div>
+
             <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
               {options.map((option) => (
                 <label
                   key={option.key}
-                  className={`flex min-h-11 cursor-pointer items-center justify-center rounded-xl border px-3 py-3 font-bold transition-colors ${
+                  className={`flex min-h-11 cursor-pointer items-center justify-center rounded-xl border text-sm font-bold transition-colors ${
                     selectedAnswers.includes(option.key)
-                      ? 'border-primary bg-primary text-white'
+                      ? 'border-primary bg-primary text-white shadow-xs'
                       : 'border-border bg-surface text-text hover:bg-surface-hover'
                   }`}
                 >
@@ -580,11 +577,11 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
           </fieldset>
         </div>
 
-        <div className="flex items-center justify-end gap-3 border-t border-border bg-surface-2/50 px-6 py-4">
+        <div className="flex items-center justify-end gap-3 border-t border-border/80 bg-surface-2/50 px-6 py-4">
           <button
             type="button"
             onClick={onCancel}
-            className="btn btn-ghost px-5"
+            className="btn btn-ghost px-5 text-sm"
           >
             Huỷ
           </button>
@@ -592,9 +589,9 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
             type="button"
             onClick={handleSave}
             disabled={ocrState.type === 'loading'}
-            className="btn btn-primary px-5 disabled:cursor-wait"
+            className="btn btn-primary px-6 text-sm font-bold shadow-md shadow-primary/25 disabled:cursor-wait"
           >
-            <Check size={18} aria-hidden="true" />
+            <Check size={16} aria-hidden="true" />
             Lưu câu hỏi
           </button>
         </div>
@@ -602,3 +599,5 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
     </div>
   );
 }
+
+

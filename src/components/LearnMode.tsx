@@ -6,7 +6,6 @@ import { StudySetup } from './StudySetup';
 import { 
   CheckCircle2, 
   XCircle, 
-  GraduationCap, 
   RefreshCw, 
   Volume2, 
   Star, 
@@ -14,7 +13,8 @@ import {
   Sparkles,
   Lightbulb,
   Check,
-  X
+  X,
+  Trophy
 } from 'lucide-react';
 import { playSound } from '../lib/sound';
 import { getQuestionAnswerKeys } from '../lib/answer-utils';
@@ -179,8 +179,9 @@ export function LearnMode() {
 
   if (activeQuestions.length === 0) {
     return (
-      <div className="text-center mt-20 text-text-muted">
-        Không có câu hỏi nào. Vui lòng import bộ đề mới.
+      <div className="mx-auto flex min-h-[50vh] max-w-md flex-col items-center justify-center text-center p-6">
+        <p className="text-base font-semibold text-text-muted">Không có câu hỏi nào trong bộ đề.</p>
+        <p className="mt-1 text-xs text-text-secondary">Vui lòng tạo hoặc nhập bộ đề mới ở Trang chủ.</p>
       </div>
     );
   }
@@ -190,7 +191,7 @@ export function LearnMode() {
       <StudySetup 
         totalQuestions={activeQuestions.length} 
         onStart={setSettings} 
-        title="Thiết lập Học"
+        title="Thiết lập Chế độ Học"
         storageKey="learn_settings"
         showShuffleOptions={true}
       />
@@ -199,9 +200,9 @@ export function LearnMode() {
 
   if (sessionQuestions.length === 0) {
     return (
-      <div className="text-center mt-20 text-text-muted">
-        Không có câu hỏi nào trong phạm vi đã chọn.
-        <button onClick={() => setSettings(null)} className="block mx-auto mt-4 text-primary hover:underline font-semibold">
+      <div className="mx-auto flex min-h-[50vh] max-w-md flex-col items-center justify-center text-center p-6">
+        <p className="text-base font-semibold text-text-muted">Không có câu hỏi nào trong phạm vi đã chọn.</p>
+        <button onClick={() => setSettings(null)} className="btn btn-primary mt-4 px-5">
           Quay lại thiết lập
         </button>
       </div>
@@ -214,48 +215,48 @@ export function LearnMode() {
 
     return (
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
+        initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="mx-auto flex max-w-xl flex-col items-center justify-center px-6 py-12 text-center"
+        className="mx-auto flex max-w-xl flex-col items-center justify-center px-6 py-10 text-center"
       >
-        <div className="mb-6 flex size-24 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-[0_12px_30px_rgba(5,150,105,0.18)]">
-          <GraduationCap size={52} />
+        <div className="mb-6 flex size-20 items-center justify-center rounded-3xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-white shadow-lg shadow-emerald-500/25">
+          <Trophy size={42} />
         </div>
         
-        <h2 className="mb-2 text-3xl font-bold leading-tight text-text">
-          Xuất sắc! Bạn đã học xong vòng này
+        <h2 className="mb-2 text-2xl sm:text-3xl font-extrabold leading-tight text-text">
+          Xuất sắc! Bạn đã hoàn thành
         </h2>
-        <p className="mb-8 max-w-md text-base leading-7 text-text-secondary">
-          Bạn đã ôn tập toàn bộ các câu hỏi trong mục tiêu đã chọn. Hãy duy trì thói quen mỗi ngày!
+        <p className="mb-8 max-w-md text-sm sm:text-base text-text-secondary">
+          Bạn đã ôn tập toàn bộ các câu hỏi trong mục tiêu đã chọn. Tiếp tục duy trì phong độ nhé!
         </p>
         
-        <div className="elevated-card mb-8 grid w-full grid-cols-3 gap-3 p-4 sm:gap-4 sm:p-6">
-          <div className="rounded-xl bg-background p-3">
-            <p className="mb-1 text-xs font-bold text-text-muted">Đúng lần đầu</p>
-            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{session.stats.correct}</p>
+        <div className="elevated-card mb-8 grid w-full grid-cols-3 gap-3 p-4 sm:gap-4 sm:p-6 rounded-3xl">
+          <div className="rounded-2xl bg-surface-2 p-3.5">
+            <p className="mb-1 text-xs font-bold text-text-muted">Đúng lần 1</p>
+            <p className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">{session.stats.correct}</p>
           </div>
-          <div className="rounded-xl bg-background p-3">
+          <div className="rounded-2xl bg-surface-2 p-3.5">
             <p className="mb-1 text-xs font-bold text-text-muted">Đã ôn lại</p>
-            <p className="text-2xl font-bold text-orange-500 dark:text-orange-400">{session.stats.incorrect}</p>
+            <p className="text-2xl sm:text-3xl font-extrabold text-amber-500">{session.stats.incorrect}</p>
           </div>
-          <div className="rounded-xl bg-background p-3">
-            <p className="mb-1 text-xs font-bold text-text-muted">Độ chính xác</p>
-            <p className="text-2xl font-bold text-primary">{accuracy}%</p>
+          <div className="rounded-2xl bg-surface-2 p-3.5">
+            <p className="mb-1 text-xs font-bold text-text-muted">Chính xác</p>
+            <p className="text-2xl sm:text-3xl font-extrabold text-primary">{accuracy}%</p>
           </div>
         </div>
         
         <div className="flex w-full gap-3 sm:w-auto">
           <button 
             onClick={() => setSettings(null)}
-            className="btn btn-secondary flex-1 px-6 py-3.5 sm:flex-initial"
+            className="btn btn-secondary flex-1 px-6 py-3 font-semibold sm:flex-initial"
           >
             Học phạm vi khác
           </button>
           <button 
             onClick={() => window.location.reload()}
-            className="btn btn-primary flex-1 px-8 py-3.5 sm:flex-initial"
+            className="btn btn-primary flex-1 px-8 py-3 font-bold shadow-md shadow-primary/25 sm:flex-initial"
           >
-            Trang tổng quan
+            Trang chủ
           </button>
         </div>
       </motion.div>
@@ -287,22 +288,22 @@ export function LearnMode() {
             </span>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5">
-                <div className="badge border border-emerald-200/70 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
-                <Check size={13} className="stroke-[3]" /> {session.stats.correct}
+              <div className="badge badge-success">
+                <Check size={12} className="stroke-[3]" /> {session.stats.correct}
               </div>
-              <div className="badge border border-rose-200/70 bg-rose-50 text-rose-700">
-                <X size={13} className="stroke-[3]" /> {session.stats.incorrect}
+              <div className="badge badge-warning">
+                <X size={12} className="stroke-[3]" /> {session.stats.incorrect}
               </div>
             </div>
 
             <button 
               onClick={() => setSettings(null)}
-              className="btn btn-ghost min-h-9 px-2 py-1.5 text-xs"
+              className="btn btn-ghost min-h-8 px-2 py-1 text-xs text-text-muted hover:text-text"
               title="Thiết lập lại"
             >
-              <RefreshCw size={14} />
+              <RefreshCw size={13} />
               <span className="hidden sm:inline">Cài đặt</span>
             </button>
           </div>
@@ -323,23 +324,23 @@ export function LearnMode() {
       <AnimatePresence mode="wait">
         <motion.div 
           key={currentQuestion.id}
-          initial={{ opacity: 0, x: 25 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -25 }}
-          transition={{ duration: 0.22, ease: "easeOut" }}
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -15 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
           className="flex flex-1 flex-col"
         >
-          <div className="elevated-card relative mb-3.5 p-4 sm:p-5">
+          <div className="elevated-card relative mb-4 p-5 sm:p-6 rounded-3xl">
             <div className="mb-3 flex items-center justify-between gap-4">
-              <span className="text-xs font-bold text-text-muted">
-                Thuật ngữ #{currentQuestion.id}
+              <span className="badge badge-muted text-xs">
+                Câu hỏi #{currentQuestion.id}
               </span>
               
               <div className="flex items-center gap-1">
                 <button
                   type="button"
                   onClick={() => speakQuestion(currentQuestion.question)}
-                  className="icon-btn min-h-9 min-w-9 rounded-lg"
+                  className="icon-btn min-h-8 min-w-8 rounded-lg"
                   title="Phát âm câu hỏi (TTS)"
                   aria-label="Phát âm câu hỏi"
                 >
@@ -348,7 +349,7 @@ export function LearnMode() {
                 <button
                   type="button"
                   onClick={() => toggleStar(currentQuestion.id)}
-                  className={`icon-btn min-h-9 min-w-9 rounded-lg ${isStarred ? 'bg-amber-50 text-amber-500' : 'hover:text-amber-500'}`}
+                  className={`icon-btn min-h-8 min-w-8 rounded-lg ${isStarred ? 'bg-amber-50 text-amber-500' : 'hover:text-amber-500'}`}
                   title="Gắn sao câu hỏi này"
                   aria-label="Gắn sao câu hỏi này"
                 >
@@ -357,12 +358,12 @@ export function LearnMode() {
               </div>
             </div>
 
-            <h3 className="text-base font-semibold leading-relaxed text-text sm:text-lg lg:text-xl">
+            <h3 className="text-lg font-bold leading-relaxed text-text sm:text-xl lg:text-2xl">
               {currentQuestion.question}
             </h3>
 
             {currentQuestion.imageDataUrl && (
-              <div className="mt-3">
+              <div className="mt-4 max-h-52">
                 <QuestionImage src={currentQuestion.imageDataUrl} />
               </div>
             )}
@@ -370,71 +371,71 @@ export function LearnMode() {
 
           {/* Multiple choice guidance */}
           {isMultiple && !isAnswered && (
-            <div className="mb-2.5 flex w-fit items-center gap-2 rounded-xl border border-primary/20 bg-primary-subtle px-3 py-1 text-xs font-semibold text-primary sm:text-sm">
+            <div className="mb-3 flex w-fit items-center gap-2 rounded-xl border border-primary/20 bg-primary-subtle px-3.5 py-1.5 text-xs font-semibold text-primary">
               <Lightbulb size={15} /> Chọn {correctKeys.length} đáp án đúng, sau đó nhấn Kiểm tra
             </div>
           )}
 
-          {/* Options Grid (Quizlet Pro Style) */}
-          <div className="space-y-2 sm:space-y-2.5">
+          {/* Options List (Quizlet Pro Style) */}
+          <div className="space-y-2.5">
             {currentQuestion.options.map((opt, index) => {
               const isSelected = selectedKeys.includes(opt.key);
               const isActuallyCorrect = correctKeys.includes(opt.key);
               const shortcutNumber = index + 1;
               
-              let cardStyle = "w-full text-left p-3 sm:p-3.5 rounded-xl border transition-all font-semibold text-sm sm:text-base flex items-center justify-between gap-3 ";
+              let cardStyle = "w-full text-left p-3.5 sm:p-4 rounded-2xl border transition-all text-xs sm:text-sm font-normal flex items-center justify-between gap-3 ";
               
               if (!isAnswered) {
                 cardStyle += isSelected 
-                  ? "border-primary bg-primary-subtle text-primary shadow-sm"
-                  : "border-border bg-surface hover:border-primary/40 hover:bg-primary-subtle/60 text-text";
+                  ? "border-primary ring-2 ring-primary/25 bg-primary-subtle text-primary shadow-xs font-medium"
+                  : "border-border bg-surface hover:border-primary/50 hover:bg-surface-hover text-text";
               } else {
                 if (isActuallyCorrect) {
-                  cardStyle += "border-emerald-500 bg-emerald-50/80 text-emerald-950 font-semibold dark:border-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-100";
+                  cardStyle += "border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50 text-emerald-950 font-medium dark:border-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-100";
                 } else if (isSelected && !isActuallyCorrect) {
-                  cardStyle += "border-rose-500 bg-rose-50/80 text-rose-950 font-semibold";
+                  cardStyle += "border-rose-500 ring-2 ring-rose-500/20 bg-rose-50 text-rose-950 font-medium dark:border-rose-800 dark:bg-rose-950/60 dark:text-rose-100";
                 } else {
-                  cardStyle += "border-border bg-surface opacity-45 text-text-muted";
+                  cardStyle += "border-border bg-surface opacity-40 text-text-muted";
                 }
               }
 
               return (
                 <motion.button
                   key={opt.key}
-                  whileHover={!isAnswered ? { scale: 1.006, y: -1 } : {}}
-                  whileTap={!isAnswered ? { scale: 0.985 } : {}}
-                  animate={isAnswered && isSelected && !isActuallyCorrect ? { x: [-5, 5, -4, 4, 0] } : {}}
+                  whileHover={!isAnswered ? { scale: 1.004, y: -1 } : {}}
+                  whileTap={!isAnswered ? { scale: 0.99 } : {}}
+                  animate={isAnswered && isSelected && !isActuallyCorrect ? { x: [-6, 6, -4, 4, 0] } : {}}
                   transition={{ duration: 0.25 }}
                   onClick={() => handleSelect(opt.key)}
                   disabled={isAnswered}
                   className={cardStyle}
                 >
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <span className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center font-bold text-xs sm:text-sm flex-shrink-0 transition-colors ${
+                  <div className="flex items-center gap-3.5 flex-1 min-w-0">
+                    <span className={`size-7 sm:size-8 rounded-xl flex items-center justify-center font-bold text-xs flex-shrink-0 transition-colors ${
                       isAnswered && isActuallyCorrect 
-                        ? 'bg-emerald-500 text-white' 
+                        ? 'bg-emerald-600 text-white shadow-xs' 
                         : isAnswered && isSelected && !isActuallyCorrect
-                        ? 'bg-rose-500 text-white'
+                        ? 'bg-rose-600 text-white shadow-xs'
                         : isSelected
-                        ? 'bg-primary text-white'
-                        : 'bg-surface-2 border border-border text-text-muted'
+                        ? 'bg-primary text-white shadow-xs'
+                        : 'bg-surface-2 border border-border text-text-muted font-semibold'
                     }`}>
                       {opt.key}
                     </span>
-                    <span className="leading-snug break-words">{opt.text}</span>
+                    <span className="leading-relaxed break-words font-normal text-text">{opt.text}</span>
                   </div>
 
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {!isAnswered && (
-                      <kbd className="hidden sm:inline-flex items-center justify-center min-w-[20px] h-[20px] px-1 rounded-md text-xs font-bold text-text-muted bg-surface-2 border border-border shadow-xs">
+                      <kbd className="hidden sm:inline-flex items-center justify-center min-w-[20px] h-[20px] px-1 rounded-md text-[11px] font-mono font-medium text-text-muted bg-surface-2 border border-border">
                         {shortcutNumber}
                       </kbd>
                     )}
                     {isAnswered && isActuallyCorrect && (
-                      <CheckCircle2 className="text-emerald-600 flex-shrink-0" size={20} />
+                      <CheckCircle2 className="text-emerald-600 dark:text-emerald-400 flex-shrink-0" size={20} />
                     )}
                     {isAnswered && isSelected && !isActuallyCorrect && (
-                      <XCircle className="text-rose-600 flex-shrink-0" size={20} />
+                      <XCircle className="text-rose-600 dark:text-rose-400 flex-shrink-0" size={20} />
                     )}
                   </div>
                 </motion.button>
@@ -448,7 +449,7 @@ export function LearnMode() {
               type="button"
               onClick={() => submitAnswer(selectedKeys)}
               disabled={selectedKeys.length === 0}
-                  className="btn btn-primary mt-3 w-full py-3 text-sm disabled:cursor-not-allowed disabled:opacity-40 sm:text-base"
+              className="btn btn-primary mt-4 w-full py-3 text-xs sm:text-sm font-semibold shadow-md shadow-primary/25 disabled:cursor-not-allowed disabled:opacity-40"
             >
               Kiểm tra đáp án ({selectedKeys.length}/{correctKeys.length})
             </button>
@@ -458,27 +459,29 @@ export function LearnMode() {
           {isAnswered && (
             <motion.div 
               ref={feedbackRef}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-4 border-t border-border pt-3.5"
+              className="mt-5 border-t border-border/80 pt-4"
             >
               {isCorrect ? (
                 /* Correct Celebration Banner */
-                  <div className="flex items-center justify-between gap-3 rounded-xl border border-emerald-300 bg-emerald-50/90 p-3 text-emerald-950 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-100 sm:p-3.5">
+                <div className="flex items-center justify-between gap-3 rounded-2xl border border-emerald-300 bg-emerald-50 p-4 text-emerald-950 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-100">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <div className="size-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center flex-shrink-0 shadow-xs">
                       <Check size={18} className="stroke-[3]" />
                     </div>
                     <div>
-                        <strong className="block text-sm font-bold text-emerald-900 dark:text-emerald-100 sm:text-base">Chính xác! Làm rất tốt.</strong>
-                        <span className="line-clamp-1 text-xs text-emerald-800 dark:text-emerald-300 sm:text-sm">
+                      <strong className="block text-sm font-semibold text-emerald-900 dark:text-emerald-100">
+                        Chính xác! Làm rất tốt.
+                      </strong>
+                      <span className="line-clamp-1 text-xs text-emerald-800 dark:text-emerald-300">
                         {correctOptionObjects.map(o => `${o.key}. ${o.text}`).join(' · ')}
                       </span>
                     </div>
                   </div>
                   <button 
                     onClick={session.nextQuestion}
-                    className="btn min-h-10 shrink-0 rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 sm:text-sm"
+                    className="btn min-h-9 shrink-0 rounded-xl bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 shadow-sm sm:text-sm"
                   >
                     <span>Tiếp tục</span>
                     <span className="text-white/75 text-[11px] font-normal">(Space)</span>
@@ -486,37 +489,37 @@ export function LearnMode() {
                   </button>
                 </div>
               ) : (
-                /* Quizlet Learning Comparison Box (Don't worry, you are learning) */
+                /* Quizlet Learning Comparison Box */
                 <div className="space-y-3.5">
-                  <div className="elevated-card overflow-hidden">
-                    <div className="flex items-center gap-2 border-b border-rose-200/70 bg-rose-50/80 px-4 py-2.5 text-xs font-bold text-rose-900 sm:text-sm">
-                      <Lightbulb size={16} className="text-rose-600" />
+                  <div className="elevated-card overflow-hidden rounded-2xl">
+                    <div className="flex items-center gap-2 border-b border-rose-200/70 bg-rose-50/80 px-4 py-2.5 text-xs font-semibold text-rose-900 sm:text-sm dark:bg-rose-950/40 dark:text-rose-200">
+                      <Lightbulb size={15} className="text-rose-600" />
                       Đừng lo lắng, hãy cùng ghi nhớ đáp án đúng:
                     </div>
 
-                    <div className="p-3.5 sm:p-4 space-y-2.5">
+                    <div className="p-4 space-y-2.5">
                       {/* Wrong selection */}
                       {selectedOptionObjects.length > 0 && (
-                        <div className="rounded-xl border border-rose-200 bg-rose-50/60 p-2.5 sm:p-3">
-                          <span className="mb-0.5 flex items-center gap-1.5 text-xs font-bold text-rose-700">
-                            <XCircle size={14} /> Bạn đã chọn:
+                        <div className="rounded-xl border border-rose-200 bg-rose-50/60 p-3 dark:border-rose-800 dark:bg-rose-950/30">
+                          <span className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300">
+                            <XCircle size={13} /> Bạn đã chọn:
                           </span>
-                          <p className="text-xs sm:text-sm font-semibold text-rose-950">
+                          <p className="text-xs sm:text-sm font-normal text-rose-950 dark:text-rose-100">
                             {selectedOptionObjects.map(o => `${o.key}. ${o.text}`).join(' · ')}
                           </p>
                         </div>
                       )}
 
                       {/* Correct answer */}
-                        <div className="rounded-xl border border-emerald-300 bg-emerald-50/80 p-2.5 sm:p-3">
-                          <span className="mb-0.5 flex items-center gap-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-300">
-                            <CheckCircle2 size={14} /> Đáp án đúng:
+                      <div className="rounded-xl border border-emerald-300 bg-emerald-50/80 p-3 dark:border-emerald-800 dark:bg-emerald-950/40">
+                        <span className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                          <CheckCircle2 size={13} /> Đáp án đúng:
                         </span>
-                        <p className="text-xs sm:text-sm font-bold text-emerald-950 dark:text-emerald-100">
+                        <p className="text-xs sm:text-sm font-medium text-emerald-950 dark:text-emerald-100">
                           {correctOptionObjects.map(o => `${o.key}. ${o.text}`).join(' · ')}
                         </p>
                         {currentQuestion.answer && (
-                          <p className="mt-1 text-xs text-emerald-800 font-medium border-t border-emerald-200/80 pt-1 dark:border-emerald-800 dark:text-emerald-300">
+                          <p className="mt-1 text-xs text-emerald-800 font-normal border-t border-emerald-200/80 pt-1 dark:border-emerald-800 dark:text-emerald-300">
                             Ghi chú: {currentQuestion.answer}
                           </p>
                         )}
@@ -527,10 +530,10 @@ export function LearnMode() {
                   {/* Action Button */}
                   <button 
                     onClick={session.nextQuestion}
-                    className="btn btn-primary group w-full py-3 text-sm sm:py-3.5 sm:text-base"
+                    className="btn btn-primary group w-full py-3 text-xs sm:text-sm font-semibold shadow-md shadow-primary/25"
                   >
                     <span>Tiếp tục</span>
-                    <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                    <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
                     <span className="text-white/75 text-xs font-normal ml-1">(Phím Space)</span>
                   </button>
                 </div>
@@ -542,3 +545,4 @@ export function LearnMode() {
     </div>
   );
 }
+

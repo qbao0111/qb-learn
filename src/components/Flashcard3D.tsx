@@ -3,6 +3,7 @@ import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { playSound } from '../lib/sound';
 import { getQuestionAnswerKeys } from '../lib/answer-utils';
 import { QuestionImage } from './QuestionImage';
+import { CheckCircle2, RotateCw, Lightbulb } from 'lucide-react';
 
 export interface Question {
   id: number;
@@ -32,8 +33,8 @@ export function Flashcard3D({ question, index }: Flashcard3DProps) {
   const mouseXSpring = useSpring(x, { stiffness: 300, damping: 40 });
   const mouseYSpring = useSpring(y, { stiffness: 300, damping: 40 });
 
-  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["7deg", "-7deg"]);
-  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-7deg", "7deg"]);
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["6deg", "-6deg"]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-6deg", "6deg"]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
@@ -63,10 +64,11 @@ export function Flashcard3D({ question, index }: Flashcard3DProps) {
   // Handle spacebar to flip
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
       if (e.code === 'Space') {
         e.preventDefault();
         setIsFlipped(prev => {
-          if (!prev) playSound('flip');
+          playSound('flip');
           return !prev;
         });
       }
@@ -85,7 +87,7 @@ export function Flashcard3D({ question, index }: Flashcard3DProps) {
     .join(' · ');
 
   return (
-    <div className="flex w-full justify-center py-5 perspective-1200 sm:py-8">
+    <div className="flex w-full justify-center py-3 perspective-1200 sm:py-5">
       <motion.div
         ref={cardRef}
         onMouseMove={handleMouseMove}
@@ -97,11 +99,11 @@ export function Flashcard3D({ question, index }: Flashcard3DProps) {
         style={{ 
           rotateX, 
           rotateY,
-          minHeight: 'clamp(380px, 54vh, 580px)' 
+          minHeight: 'clamp(400px, 58vh, 600px)' 
         }}
-        className="relative w-full max-w-4xl cursor-pointer"
-        whileHover={{ scale: 1.01 }}
-        whileTap={{ scale: 0.98 }}
+        className="relative w-full max-w-4xl cursor-pointer select-none"
+        whileHover={{ scale: 1.008 }}
+        whileTap={{ scale: 0.99 }}
         role="button"
         tabIndex={0}
         onKeyDown={(e) => {
@@ -114,62 +116,112 @@ export function Flashcard3D({ question, index }: Flashcard3DProps) {
         <motion.div
           initial={false}
           animate={{ rotateY: isFlipped ? 180 : 0 }}
-          transition={{ duration: 0.6, type: "spring", stiffness: 200, damping: 20 }}
-          className="w-full h-full relative preserve-3d"
+          transition={{ duration: 0.5, type: "spring", stiffness: 220, damping: 24 }}
+          className="w-full h-full relative"
           style={{ transformStyle: "preserve-3d" }}
         >
           {/* FRONT FACE */}
           <div
-            className="elevated-card absolute inset-0 flex h-full w-full flex-col items-center justify-center p-5 backface-hidden sm:p-8"
+            className="elevated-card absolute inset-0 flex h-full w-full flex-col justify-between p-6 sm:p-8 rounded-3xl"
             style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
           >
-            <div className="absolute left-5 top-4 text-sm font-semibold text-text-muted sm:left-6">
-              Thẻ {index + 1} • Nguồn #{question.id}
+            {/* Top Bar */}
+            <div className="flex items-center justify-between gap-3 text-xs font-semibold text-text-muted">
+              <span className="badge badge-muted">
+                Thẻ #{index + 1}
+              </span>
+              <span className="flex items-center gap-1.5 text-primary">
+                <RotateCw size={13} /> Nhấn để xem đáp án
+              </span>
             </div>
-            <div className="badge badge-primary mb-6">
-              Câu hỏi
+
+            {/* Content Center */}
+            <div className="my-auto flex flex-col items-center text-center py-4">
+              <h3 className="mb-6 max-w-3xl text-lg font-bold leading-relaxed text-text sm:text-2xl sm:leading-relaxed">
+                {question.question}
+              </h3>
+
+              {question.imageDataUrl && (
+                <div className="mb-6 max-h-44">
+                  <QuestionImage src={question.imageDataUrl} compact />
+                </div>
+              )}
+
+              {question.options && question.options.length > 0 && (
+                <div className="grid w-full max-w-2xl grid-cols-1 gap-2.5 sm:grid-cols-2 text-left">
+                  {question.options.map((opt) => (
+                    <div 
+                      key={opt.key} 
+                      className="rounded-xl border border-border bg-surface-2/60 p-3 text-xs sm:text-sm font-normal text-text-secondary leading-relaxed transition-colors"
+                    >
+                      <span className="text-primary font-semibold mr-1.5">{opt.key}.</span>
+                      <span>{opt.text}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-            <h3 className="mb-8 max-w-2xl text-center text-xl font-semibold leading-relaxed text-text sm:text-2xl">
-              {question.question}
-            </h3>
-            {question.imageDataUrl && (
-              <div className="mb-6">
-                <QuestionImage src={question.imageDataUrl} compact />
-              </div>
-            )}
-            <ul className="grid w-full max-w-3xl grid-cols-1 gap-3 md:grid-cols-2">
-              {question.options.map((opt, i) => (
-                <li key={i} className="rounded-xl border border-border/80 bg-background p-4 text-center text-sm leading-6 text-text-secondary transition-colors hover:border-primary/30 hover:bg-primary-subtle/45 md:text-base">
-                  <strong className="text-primary mr-2">{opt.key}.</strong> {opt.text}
-                </li>
-              ))}
-            </ul>
+
+            {/* Bottom Indicator */}
+            <div className="text-center text-[11px] font-normal text-text-muted">
+              Nguồn câu hỏi #{question.id}
+            </div>
           </div>
 
           {/* BACK FACE */}
           <div
-            className="elevated-card absolute inset-0 flex h-full w-full flex-col items-center justify-center p-5 backface-hidden sm:p-8"
+            className="elevated-card absolute inset-0 flex h-full w-full flex-col justify-between p-6 sm:p-8 rounded-3xl border-emerald-300/60 dark:border-emerald-800"
             style={{ 
               backfaceVisibility: "hidden", 
               WebkitBackfaceVisibility: "hidden",
               transform: "rotateY(180deg)"
             }}
           >
-            <div className="absolute left-5 top-4 text-sm font-semibold text-text-muted sm:left-6">
-              Thẻ {index + 1} • Nguồn #{question.id}
+            {/* Top Bar */}
+            <div className="flex items-center justify-between gap-3 text-xs font-semibold text-text-muted">
+              <span className="badge badge-success">
+                <CheckCircle2 size={13} /> Đáp án đúng
+              </span>
+              <span className="flex items-center gap-1.5 text-text-muted">
+                <RotateCw size={13} /> Nhấn để lật lại câu hỏi
+              </span>
             </div>
-            <div className="badge badge-success mb-6 dark:bg-emerald-950/60 dark:text-emerald-300">
-              Đáp án đúng
+
+            {/* Content Center */}
+            <div className="my-auto flex flex-col items-center text-center py-4 space-y-4">
+              <div className="flex size-14 items-center justify-center rounded-2xl bg-emerald-500 text-white shadow-md shadow-emerald-500/25">
+                <CheckCircle2 size={30} />
+              </div>
+
+              <div className="max-w-2xl">
+                <h3 className="text-xl font-bold leading-relaxed text-emerald-600 dark:text-emerald-400 sm:text-2xl">
+                  {correctAnswerText}
+                </h3>
+              </div>
+
+              {question.explanation ? (
+                <div className="flex items-start gap-2.5 rounded-2xl border border-emerald-200/80 bg-emerald-50/70 p-4 text-left text-xs sm:text-sm font-normal text-emerald-950 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200 max-w-xl">
+                  <Lightbulb size={17} className="shrink-0 text-emerald-600 dark:text-emerald-400 mt-0.5" />
+                  <div>
+                    <strong className="block mb-0.5 text-xs font-semibold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">Giải thích chi tiết</strong>
+                    {question.explanation}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-text-muted font-normal">
+                  Ghi nhớ kĩ các từ khoá của đáp án này nhé!
+                </p>
+              )}
             </div>
-            <h3 className="mb-4 max-w-2xl text-center text-xl font-bold leading-relaxed text-emerald-700 dark:text-emerald-300 sm:text-2xl">
-              {correctAnswerText}
-            </h3>
-            <p className="text-text-muted text-center max-w-xl">
-              {question.explanation ? `Gợi ý: ${question.explanation}` : "Hãy ghi nhớ đáp án đúng nhé."}
-            </p>
+
+            {/* Bottom Indicator */}
+            <div className="text-center text-[11px] font-normal text-text-muted">
+              Thẻ #{index + 1} • Nguồn #{question.id}
+            </div>
           </div>
         </motion.div>
       </motion.div>
     </div>
   );
 }
+

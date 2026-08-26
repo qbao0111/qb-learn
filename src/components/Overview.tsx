@@ -7,10 +7,14 @@ import {
   X,
   Download,
   LoaderCircle,
-  Cloud,
-  CloudOff,
-  RefreshCw,
   FileSpreadsheet,
+  Layers,
+  GraduationCap,
+  ListChecks,
+  Sparkles,
+  ArrowRight,
+  PlusCircle,
+  FolderOpen
 } from 'lucide-react';
 import { useStore } from '../store';
 import { parseQuizletPdf } from '../lib/pdf-loader';
@@ -20,16 +24,13 @@ import {
 } from '../lib/import-bank';
 import { downloadQuizletPdf } from '../lib/quizlet-pdf-export';
 import { downloadBanksBackup, readBanksBackup } from '../lib/data-backup';
-import {
-  connectCloudSync,
-  disconnectCloudSync,
-  hasStoredSyncCode,
-  syncCloudNow,
-  useCloudSyncState,
-} from '../lib/cloud-sync';
 import { TextBankImportDialog } from './TextBankImportDialog';
 
-export function Overview() {
+interface OverviewProps {
+  onNavigate?: (mode: 'flashcards' | 'learn' | 'exam' | 'manage') => void;
+}
+
+export function Overview({ onNavigate }: OverviewProps) {
   const { banks, activeBankId, setActiveBank, addBank, deleteBank, restoreBanks } = useStore();
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -40,23 +41,12 @@ export function Overview() {
   const [removeDuplicates, setRemoveDuplicates] = useState(false);
   const [exportingBankId, setExportingBankId] = useState<string | null>(null);
   const [exportError, setExportError] = useState('');
-  const [syncCode, setSyncCode] = useState('');
-  const [syncActionError, setSyncActionError] = useState('');
   const [textImportOpen, setTextImportOpen] = useState(false);
-  const syncState = useCloudSyncState();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const backupInputRef = useRef<HTMLInputElement>(null);
   const closeTextImport = useCallback(() => setTextImportOpen(false), []);
 
-  const handleConnectSync = async () => {
-    setSyncActionError('');
-    try {
-      await connectCloudSync(syncCode);
-      setSyncCode('');
-    } catch (error) {
-      setSyncActionError(error instanceof Error ? error.message : 'Không thể kết nối đồng bộ.');
-    }
-  };
+  const activeBank = banks.find((b) => b.id === activeBankId) || banks[0];
 
   const handleRestoreBackup = async (file?: File) => {
     if (!file) return;
@@ -181,230 +171,220 @@ export function Overview() {
   };
 
   return (
-    <div className="min-w-0 w-full space-y-8 overflow-x-hidden pb-10">
-      <div className="min-w-0 flex flex-col gap-2 pt-1">
-        <h2 className="text-[2rem] font-bold leading-tight tracking-[-0.01em] text-text">Tổng quan bộ đề</h2>
-        <p className="max-w-full text-base leading-7 text-text-secondary sm:max-w-2xl">
-          Tạo, đồng bộ và chọn bộ đề đang học trong một không gian gọn hơn.
-        </p>
-      </div>
+    <div className="min-w-0 w-full space-y-7 overflow-x-hidden pb-12">
+      {/* 1. QUIZLET HERO: JUMP BACK IN / TIẾP TỤC HỌC */}
+      {activeBank && (
+        <section className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-surface to-surface p-5 sm:p-7 shadow-xs">
+          <div className="absolute -right-12 -top-12 size-48 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+          
+          <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0 flex-1 space-y-1.5">
+              <div className="flex items-center gap-2">
+                <span className="badge badge-primary text-xs font-semibold">
+                  <Sparkles size={12} /> Đang chọn học
+                </span>
+                <span className="text-[11px] font-normal text-text-muted">
+                  Tạo ngày {new Date(activeBank.createdAt).toLocaleDateString('vi-VN')}
+                </span>
+              </div>
 
-      <div className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-12 lg:items-stretch">
-        {/* Upload Section */}
-        <section className="elevated-card min-w-0 lg:col-span-8">
-          <div className="flex h-full flex-col p-4 sm:p-5">
-            <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0">
-                <h3 className="flex items-center gap-2 text-xl font-bold leading-tight text-text">
-                  <span className="flex size-9 items-center justify-center rounded-xl bg-primary-subtle text-primary">
-                    <Upload size={20} />
-                  </span>
-                  Tạo bộ đề mới
-                </h3>
-                <p className="mt-1 text-sm leading-6 text-text-secondary">Nhập từ PDF Quizlet hoặc dán dữ liệu dạng bảng.</p>
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-text truncate">
+                {activeBank.name}
+              </h2>
+
+              <p className="text-xs sm:text-sm font-normal text-text-secondary leading-relaxed">
+                Bộ đề gồm <strong className="text-primary font-semibold">{activeBank.report?.usableMultipleChoice ?? activeBank.questions.length}</strong> câu hỏi trắc nghiệm đã sẵn sàng.
+              </p>
+            </div>
+
+            {/* Quick Action Study Modes */}
+            <div className="flex flex-wrap items-center gap-2.5">
+              <button
+                type="button"
+                onClick={() => onNavigate ? onNavigate('learn') : null}
+                className="btn btn-primary px-4 py-2.5 text-xs sm:text-sm font-medium shadow-sm shadow-primary/20"
+              >
+                <GraduationCap size={17} />
+                <span>Học thông minh</span>
+                <ArrowRight size={15} />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onNavigate ? onNavigate('flashcards') : null}
+                className="btn btn-secondary px-3.5 py-2.5 text-xs sm:text-sm font-medium"
+              >
+                <Layers size={17} />
+                <span>Thẻ ghi nhớ</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onNavigate ? onNavigate('exam') : null}
+                className="btn btn-secondary px-3.5 py-2.5 text-xs sm:text-sm font-medium"
+              >
+                <ListChecks size={17} />
+                <span>Làm kiểm tra</span>
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* 2. CREATE / IMPORT HUB */}
+      <section className="elevated-card min-w-0 flex flex-col p-5 sm:p-6 rounded-2xl">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <h3 className="flex items-center gap-2 text-base sm:text-lg font-bold text-text">
+              <span className="flex size-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <PlusCircle size={18} />
+              </span>
+              Tạo bộ đề mới
+            </h3>
+            <p className="mt-0.5 text-xs text-text-secondary leading-relaxed">
+              Tải lên file PDF in từ Quizlet hoặc dán văn bản / TSV dạng bảng.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setTextImportOpen(true)}
+            className="btn btn-secondary shrink-0 text-xs font-medium self-start sm:self-auto"
+          >
+            <FileSpreadsheet size={15} />
+            <span>Nhập TSV / Bảng</span>
+          </button>
+        </div>
+
+        {/* Dropzone */}
+        <div
+          className={`group relative flex min-h-[140px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-all duration-200 ${
+            isDragging 
+              ? 'border-primary bg-primary-subtle shadow-md shadow-primary/15 scale-[1.005]' 
+              : 'border-border bg-surface-2 hover:border-primary/50 hover:bg-primary-subtle/30'
+          }`}
+          onDragOver={onDragOver}
+          onDragLeave={onDragLeave}
+          onDrop={onDrop}
+          onClick={() => fileInputRef.current?.click()}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') fileInputRef.current?.click();
+          }}
+        >
+          <input
+            id="pdf-file-input"
+            type="file"
+            accept=".pdf,application/pdf"
+            className="hidden"
+            ref={fileInputRef}
+            onChange={(e) => applySelectedFile(e.target.files?.[0])}
+          />
+          <div className={`mb-2.5 flex size-11 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-105 ${
+            isDragging ? 'bg-primary text-white' : 'bg-surface text-primary shadow-xs'
+          }`}>
+            <Upload size={22} strokeWidth={2} />
+          </div>
+          <p className="text-sm sm:text-base font-semibold text-text">
+            Kéo thả file PDF vào đây hoặc <span className="text-primary underline decoration-1 underline-offset-2">chọn từ máy</span>
+          </p>
+          <p className="mt-0.5 text-xs text-text-muted">
+            Hỗ trợ định dạng PDF (.pdf) in danh sách từ Quizlet
+          </p>
+        </div>
+
+        {/* Selected File Form */}
+        {selectedFile && (
+          <div className="mt-4 rounded-xl border border-primary/30 bg-primary-subtle/40 p-4 space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 truncate text-xs sm:text-sm font-semibold text-primary">
+                <FileText size={16} className="shrink-0" />
+                <span className="truncate">{selectedFile.name}</span>
               </div>
               <button
                 type="button"
-                onClick={() => setTextImportOpen(true)}
-                className="btn btn-secondary w-full shrink-0 sm:w-auto"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  clearSelectedFile();
+                }}
+                className="icon-btn min-h-6 min-w-6 rounded-md text-text-muted hover:text-danger"
+                aria-label="Bỏ file đã chọn"
               >
-                <FileSpreadsheet size={18} />
-                Nhập văn bản / TSV
+                <X size={15} />
               </button>
             </div>
 
-            <div
-              className={`grid min-h-[150px] min-w-0 cursor-pointer grid-cols-1 items-center gap-4 rounded-2xl border border-dashed p-4 transition-all duration-200 sm:min-h-[178px] sm:grid-cols-[auto_1fr_auto] sm:p-5 ${isDragging ? 'border-primary bg-primary-subtle shadow-[inset_0_0_0_1px_rgba(66,85,255,0.12)]' : 'border-primary/20 bg-primary-subtle/50 hover:border-primary/50 hover:bg-primary-subtle'}`}
-              onDragOver={onDragOver}
-              onDragLeave={onDragLeave}
-              onDrop={onDrop}
-              onClick={() => fileInputRef.current?.click()}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' || event.key === ' ') fileInputRef.current?.click();
-              }}
-            >
-              <input
-                id="pdf-file-input"
-                type="file"
-                accept=".pdf,application/pdf"
-                className="hidden"
-                ref={fileInputRef}
-                onChange={(e) => applySelectedFile(e.target.files?.[0])}
-              />
-              <div className={`mx-auto flex size-14 items-center justify-center rounded-2xl sm:mx-0 ${isDragging ? 'bg-primary text-white' : 'bg-surface text-primary shadow-sm'}`}>
-                <FileText size={29} />
-              </div>
-              <div className="min-w-0 text-center sm:text-left">
-                <p className="text-lg font-bold leading-7 text-text">Kéo thả file PDF vào đây</p>
-                <p className="mt-1 break-words text-sm leading-6 text-text-secondary">Hoặc chọn file từ máy. Chỉ hỗ trợ định dạng PDF (.pdf)</p>
-              </div>
-              <span className="btn btn-primary pointer-events-none w-full justify-self-center px-5 sm:w-auto sm:justify-self-end">
-                Chọn file PDF
-              </span>
-            </div>
-
-            {selectedFile && (
-              <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
-                <label className="block">
-                  <span className="mb-2 block text-sm font-semibold text-text">Tên bộ đề</span>
-                  <input
-                    value={bankName}
-                    onChange={(event) => setBankName(event.target.value)}
-                    placeholder="Bộ đề chưa đặt tên"
-                    className="input px-4 py-3"
-                  />
-                </label>
-                <button
-                  type="button"
-                  onClick={handleImport}
-                  disabled={isLoading}
-                  className="btn btn-primary px-6 py-3 disabled:cursor-wait"
-                >
-                  {isLoading ? 'Đang tạo...' : 'Tạo bộ đề từ PDF'}
-                </button>
-                <label className="flex items-start gap-3 rounded-xl bg-background px-4 py-3 text-sm sm:col-span-2">
-                  <input
-                    type="checkbox"
-                    checked={removeDuplicates}
-                    onChange={(event) => setRemoveDuplicates(event.target.checked)}
-                    className="mt-0.5 h-4 w-4 accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                  />
-                  <span>
-                    <span className="block font-semibold text-text">Lọc câu hỏi có cùng nội dung</span>
-                    <span className="text-text-muted">
-                      Để trống để giữ nguyên đủ số thẻ như trên Quizlet, kể cả các câu lặp lại.
-                    </span>
-                  </span>
-                </label>
-                <div className="flex min-w-0 items-center gap-2 text-sm text-text-muted sm:col-span-2">
-                  <FileText size={16} className="shrink-0 text-primary" />
-                  <span className="truncate">{selectedFile.name}</span>
-                  <button
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      clearSelectedFile();
-                    }}
-                    className="icon-btn ml-auto min-h-8 min-w-8 rounded-lg"
-                    aria-label="Bỏ file đã chọn"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {status && (
-              <div
-                role={statusType === 'error' ? 'alert' : 'status'}
-                aria-live={statusType === 'error' ? 'assertive' : 'polite'}
-                className={`mt-4 rounded-xl border p-3 text-sm font-semibold ${
-                  statusType === 'error'
-                    ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/60 dark:text-red-300'
-                    : statusType === 'success'
-                      ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
-                      : 'border-primary/20 bg-primary-subtle text-primary'
-                }`}
+            <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+              <label className="block">
+                <span className="mb-1 block text-xs font-semibold text-text">Đặt tên bộ đề</span>
+                <input
+                  value={bankName}
+                  onChange={(event) => setBankName(event.target.value)}
+                  placeholder="Nhập tên bộ đề..."
+                  className="input px-3.5 py-2 text-xs sm:text-sm bg-surface"
+                />
+              </label>
+              <button
+                type="button"
+                onClick={handleImport}
+                disabled={isLoading}
+                className="btn btn-primary px-5 py-2 text-xs sm:text-sm font-semibold disabled:cursor-wait"
               >
-                {isLoading && <LoaderCircle size={16} className="mr-2 inline-block animate-spin" />}
-                {status}
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* Neon Sync */}
-        <section className="subtle-panel min-w-0 lg:col-span-4">
-          <div className="flex h-full flex-col p-4 sm:p-5">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-lg font-bold text-text">Đồng bộ Neon</h3>
-                  <span className={`badge ${syncState.connected ? 'badge-success dark:bg-emerald-950/60 dark:text-emerald-300' : 'badge-muted'}`}>
-                    <span className={`size-1.5 rounded-full ${syncState.connected ? 'bg-emerald-600' : 'bg-text-muted'}`} />
-                    {syncState.connected ? 'Đã kết nối' : 'Chưa kết nối'}
-                  </span>
-                </div>
-                <p className="mt-2 text-sm leading-6 text-text-secondary">{syncState.message}</p>
-                {syncState.lastSyncedAt && (
-                  <p className="mt-1 text-xs font-medium text-text-muted">
-                    Cập nhật lúc {new Date(syncState.lastSyncedAt).toLocaleTimeString('vi-VN')}
-                  </p>
-                )}
-              </div>
-              <div className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${syncState.connected ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-300' : 'bg-surface text-primary'}`}>
-                {syncState.connected ? <Cloud size={21} /> : <CloudOff size={21} />}
-              </div>
+                {isLoading ? 'Đang tạo...' : 'Tạo bộ đề'}
+              </button>
             </div>
 
-            {!syncState.connected ? (
-              <div className="mt-5 space-y-3">
-                <label className="block">
-                  <span className="sr-only">Mã đồng bộ</span>
-                  <input
-                    type="password"
-                    value={syncCode}
-                    onChange={(event) => setSyncCode(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter') void handleConnectSync();
-                    }}
-                    placeholder="Mã đồng bộ"
-                    autoComplete="off"
-                    className="input px-4 py-2.5"
-                  />
-                </label>
-                <button
-                  type="button"
-                  onClick={() => void handleConnectSync()}
-                  disabled={syncState.phase === 'connecting' || syncCode.trim().length < 8}
-                  className="btn btn-primary w-full"
-                >
-                  {syncState.phase === 'connecting' ? 'Đang kết nối…' : hasStoredSyncCode() ? 'Kết nối lại' : 'Bật đồng bộ'}
-                </button>
-              </div>
-            ) : (
-              <div className="mt-5 flex flex-col gap-2">
-                <button
-                  type="button"
-                  onClick={() => void syncCloudNow()}
-                  disabled={syncState.phase === 'syncing'}
-                  className="btn btn-primary w-full disabled:opacity-50"
-                >
-                  <RefreshCw size={17} className={syncState.phase === 'syncing' ? 'animate-spin' : ''} />
-                  Đồng bộ ngay
-                </button>
-                <button
-                  type="button"
-                  onClick={disconnectCloudSync}
-                  className="btn btn-ghost w-full text-text-muted hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/50 dark:hover:text-red-300"
-                >
-                  Ngắt kết nối
-                </button>
-              </div>
-            )}
-
-            {syncActionError && (
-              <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 dark:border-red-800 dark:bg-red-950/60 dark:text-red-300" role="alert">
-                {syncActionError}
-              </p>
-            )}
-            <p className="mt-auto pt-4 text-xs leading-relaxed text-text-muted">
-              Nhập cùng một mã trên máy tính và iPhone. Mã không được lưu trong database; hãy dùng mã khó đoán và không chia sẻ cho người khác.
-            </p>
+            <label className="flex items-start gap-2 text-xs text-text-secondary cursor-pointer">
+              <input
+                type="checkbox"
+                checked={removeDuplicates}
+                onChange={(event) => setRemoveDuplicates(event.target.checked)}
+                className="mt-0.5 size-3.5 accent-primary rounded cursor-pointer"
+              />
+              <span>
+                <strong className="text-text font-medium">Lọc câu hỏi trùng lặp</strong> (bỏ chọn để giữ trọn vẹn số lượng câu như file gốc).
+              </span>
+            </label>
           </div>
-        </section>
-      </div>
+        )}
 
-      {/* Bank Manager */}
-      <section className="plain-section">
-        <div className="mb-3 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="min-w-0">
-            <h3 className="text-xl font-bold text-text">Quản lý bộ đề</h3>
-            <p className="mt-1 text-sm leading-6 text-text-secondary">Sao lưu để chuyển toàn bộ bộ đề sang thiết bị khác.</p>
+        {/* Status Alert */}
+        {status && (
+          <div
+            role={statusType === 'error' ? 'alert' : 'status'}
+            aria-live={statusType === 'error' ? 'assertive' : 'polite'}
+            className={`mt-4 rounded-xl border p-3 text-xs sm:text-sm font-medium flex items-center gap-2.5 ${
+              statusType === 'error'
+                ? 'border-danger/30 bg-danger-subtle text-danger'
+                : statusType === 'success'
+                  ? 'border-success/30 bg-success-subtle text-success'
+                  : 'border-primary/20 bg-primary-subtle text-primary'
+            }`}
+          >
+            {isLoading && <LoaderCircle size={15} className="animate-spin shrink-0" />}
+            <span>{status}</span>
           </div>
-          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:shrink-0 sm:flex-wrap sm:justify-end">
+        )}
+      </section>
+
+      {/* 3. STUDY SETS LIBRARY */}
+      <section className="plain-section space-y-3.5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border/60 pb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="flex size-8 items-center justify-center rounded-xl bg-primary-subtle text-primary">
+              <FolderOpen size={18} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base sm:text-lg font-bold text-text">Thư viện bộ đề</h3>
+                <span className="badge badge-primary text-[11px] py-0.5">{banks.length} bộ đề</span>
+              </div>
+              <p className="text-xs font-normal text-text-muted">Chọn bộ đề để bắt đầu luyện tập hoặc xuất file PDF.</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
             <input
               ref={backupInputRef}
               type="file"
@@ -415,80 +395,129 @@ export function Overview() {
             <button
               type="button"
               onClick={() => backupInputRef.current?.click()}
-              className="btn btn-secondary px-3"
+              className="btn btn-secondary text-xs px-3 py-1.5 font-medium"
+              title="Khôi phục dữ liệu từ bản sao lưu JSON"
             >
-              <Upload size={18} aria-hidden="true" />
+              <Upload size={14} />
               <span>Khôi phục</span>
             </button>
             <button
               type="button"
               onClick={() => downloadBanksBackup(banks)}
-              className="btn btn-secondary px-3"
+              className="btn btn-secondary text-xs px-3 py-1.5 font-medium"
+              title="Sao lưu toàn bộ bộ đề thành file JSON"
             >
-              <Download size={18} aria-hidden="true" />
+              <Download size={14} />
               <span>Sao lưu</span>
             </button>
           </div>
         </div>
-        
+
         {exportError && (
-          <p className="m-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 dark:border-red-800 dark:bg-red-950/60 dark:text-red-300" role="alert">
+          <p className="rounded-xl border border-danger/30 bg-danger-subtle px-4 py-2 text-xs font-medium text-danger" role="alert">
             {exportError}
           </p>
         )}
 
-        <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-          {banks.map(bank => (
-            <div key={bank.id} className={`relative flex min-h-[82px] flex-col gap-3 border-b border-border/70 p-4 transition-all duration-200 last:border-b-0 sm:flex-row sm:items-center sm:justify-between ${activeBankId === bank.id ? 'bg-primary-subtle/45 before:absolute before:left-0 before:top-3 before:h-[calc(100%-1.5rem)] before:w-1 before:rounded-full before:bg-primary' : 'hover:bg-background'}`}>
-              <div className="min-w-0 flex-1 cursor-pointer pl-1" onClick={() => setActiveBank(bank.id)}>
-                <div className="flex min-w-0 flex-wrap items-center gap-2.5">
-                  <h4 className="truncate text-base font-bold text-text">{bank.name}</h4>
-                  {activeBankId === bank.id && (
-                    <span className="badge badge-primary">
-                      <CheckCircle2 size={12} /> Đang chọn
+        {/* Study Cards Grid */}
+        <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2 lg:grid-cols-3">
+          {banks.map((bank) => {
+            const isSelected = activeBankId === bank.id;
+            const usableCount = bank.report?.usableMultipleChoice ?? bank.questions.length;
+            
+            return (
+              <div
+                key={bank.id}
+                onClick={() => setActiveBank(bank.id)}
+                className={`card card-hover group relative flex cursor-pointer flex-col justify-between p-4 sm:p-5 transition-all ${
+                  isSelected 
+                    ? 'border-primary ring-2 ring-primary/20 bg-surface shadow-sm' 
+                    : 'bg-surface hover:border-primary/40'
+                }`}
+              >
+                <div>
+                  <div className="mb-2.5 flex items-center justify-between gap-2">
+                    <span className={`badge ${isSelected ? 'badge-primary font-medium' : 'badge-muted'}`}>
+                      {isSelected ? (
+                        <>
+                          <CheckCircle2 size={12} /> Đang chọn
+                        </>
+                      ) : (
+                        'Bộ đề'
+                      )}
                     </span>
-                  )}
+                    <span className="text-[11px] font-normal text-text-muted">
+                      {new Date(bank.createdAt).toLocaleDateString('vi-VN')}
+                    </span>
+                  </div>
+
+                  <h4 className="mb-1.5 text-base font-semibold leading-snug text-text group-hover:text-primary transition-colors line-clamp-2">
+                    {bank.name}
+                  </h4>
+
+                  <p className="text-xs font-normal text-text-secondary flex items-center gap-1.5">
+                    <span className="inline-block size-1.5 rounded-full bg-primary/70" />
+                    <strong>{usableCount}</strong> câu trắc nghiệm
+                  </p>
                 </div>
-                <p className="mt-1 text-sm text-text-muted">
-                  {bank.report?.usableMultipleChoice ?? bank.questions.length} câu dùng được
-                  {' • '}
-                  Tạo ngày {new Date(bank.createdAt).toLocaleDateString('vi-VN')}
-                </p>
-              </div>
 
-              <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-                <button
-                  type="button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    void handleExport(bank);
-                  }}
-                  disabled={Boolean(exportingBankId)}
-                  className="btn btn-secondary shrink-0 px-3 disabled:cursor-wait"
-                  title={`Xuất ${bank.name} thành PDF Quizlet`}
-                  aria-label={`Xuất ${bank.name} thành PDF Quizlet`}
-                >
-                  {exportingBankId === bank.id ? (
-                    <LoaderCircle size={18} className="animate-spin" aria-hidden="true" />
-                  ) : (
-                    <Download size={18} aria-hidden="true" />
-                  )}
-                  <span>{exportingBankId === bank.id ? 'Đang xuất...' : 'Xuất PDF'}</span>
-                </button>
-
-                {banks.length > 1 && (
+                {/* Card Actions */}
+                <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between gap-2">
                   <button
-                    onClick={() => deleteBank(bank.id)}
-                    className="icon-btn shrink-0 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/50 dark:hover:text-red-300"
-                    title="Xóa bộ đề"
-                    aria-label="Xóa bộ đề"
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setActiveBank(bank.id);
+                      if (onNavigate) onNavigate('learn');
+                    }}
+                    className={`btn text-xs px-3 py-1.5 font-medium ${
+                      isSelected ? 'btn-primary' : 'btn-secondary'
+                    }`}
                   >
-                    <Trash2 size={20} />
+                    <span>Luyện tập</span>
+                    <ArrowRight size={13} />
                   </button>
-                )}
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        void handleExport(bank);
+                      }}
+                      disabled={Boolean(exportingBankId)}
+                      className="icon-btn min-h-7 min-w-7 rounded-lg"
+                      title={`Xuất ${bank.name} thành PDF Quizlet`}
+                      aria-label={`Xuất ${bank.name} thành PDF Quizlet`}
+                    >
+                      {exportingBankId === bank.id ? (
+                        <LoaderCircle size={15} className="animate-spin text-primary" />
+                      ) : (
+                        <Download size={15} />
+                      )}
+                    </button>
+
+                    {banks.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          if (confirm(`Bạn có chắc muốn xoá bộ đề "${bank.name}"?`)) {
+                            deleteBank(bank.id);
+                          }
+                        }}
+                        className="icon-btn min-h-7 min-w-7 rounded-lg hover:bg-danger-subtle hover:text-danger"
+                        title="Xóa bộ đề"
+                        aria-label="Xóa bộ đề"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
@@ -496,3 +525,5 @@ export function Overview() {
     </div>
   );
 }
+
+

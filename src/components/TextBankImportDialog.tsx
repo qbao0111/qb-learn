@@ -111,7 +111,7 @@ export function TextBankImportDialog({ open, onClose }: TextBankImportDialogProp
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/55 backdrop-blur-sm sm:items-center sm:p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/60 backdrop-blur-md sm:items-center sm:p-4"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
@@ -121,50 +121,50 @@ export function TextBankImportDialog({ open, onClose }: TextBankImportDialogProp
         role="dialog"
         aria-modal="true"
         aria-labelledby="text-import-title"
-        className="flex h-[100dvh] w-full flex-col overflow-hidden bg-background shadow-2xl sm:h-[92vh] sm:max-w-6xl sm:rounded-2xl sm:border sm:border-border"
+        className="flex h-[100dvh] w-full flex-col overflow-hidden bg-background shadow-2xl sm:h-[92vh] sm:max-w-6xl sm:rounded-3xl sm:border sm:border-border"
       >
-        <header className="flex flex-shrink-0 items-start justify-between gap-4 border-b border-border bg-surface px-4 py-4 sm:px-6">
+        <header className="flex flex-shrink-0 items-center justify-between gap-4 border-b border-border/80 bg-surface px-5 py-4 sm:px-6">
           <div className="min-w-0">
-            <h2 id="text-import-title" className="text-xl font-bold leading-tight text-text sm:text-2xl">
+            <h2 id="text-import-title" className="text-lg font-extrabold leading-tight text-text sm:text-xl">
               Nhập bộ đề từ văn bản hoặc TSV
             </h2>
-            <p className="mt-1 text-sm text-text-muted">
+            <p className="mt-0.5 text-xs text-text-muted">
               Mỗi dòng là một câu hỏi; dùng dấu Tab để ngăn câu hỏi và đáp án.
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="icon-btn shrink-0 rounded-full"
+            className="icon-btn shrink-0 rounded-xl"
             aria-label="Đóng cửa sổ nhập dữ liệu"
           >
-            <X size={22} />
+            <X size={20} />
           </button>
         </header>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6">
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(340px,.95fr)]">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(340px,.95fr)]">
             <div className="min-w-0 space-y-4">
               <label className="block">
-                <span className="mb-2 block text-sm font-semibold text-text">Tên bộ đề</span>
+                <span className="mb-1.5 block text-xs font-bold text-text">Tên bộ đề</span>
                 <input
                   value={bankName}
                   onChange={(event) => setBankName(event.target.value)}
-                  className="input px-4 py-2.5"
+                  className="input px-3.5 py-2 text-sm bg-surface"
                 />
               </label>
 
               <div>
                 <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                  <label htmlFor="text-bank-source" className="text-sm font-semibold text-text">
-                    Dữ liệu
+                  <label htmlFor="text-bank-source" className="text-xs font-bold text-text">
+                    Dữ liệu nội dung
                   </label>
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="btn btn-secondary min-h-10 px-3 py-2"
+                    className="btn btn-secondary min-h-8 px-3 py-1 text-xs font-semibold"
                   >
-                    <Upload size={17} /> Chọn file TSV
+                    <Upload size={14} /> Chọn file TSV / TXT
                   </button>
                   <input
                     ref={fileInputRef}
@@ -183,26 +183,26 @@ export function TextBankImportDialog({ open, onClose }: TextBankImportDialogProp
                     setSourceName('Dữ liệu dán');
                     setError('');
                   }}
-                  rows={11}
+                  rows={10}
                   spellCheck={false}
                   placeholder={'Câu hỏi? A. Lựa chọn 1 B. Lựa chọn 2 C. Lựa chọn 3 D. Lựa chọn 4\tB\nCâu hỏi tiếp theo…\tAC'}
-                  className="input min-h-64 resize-y rounded-2xl p-4 font-mono text-sm leading-relaxed"
+                  className="input min-h-56 resize-y rounded-2xl p-3.5 font-mono text-xs sm:text-sm leading-relaxed bg-surface"
                   aria-describedby="text-import-help"
                 />
-                <p id="text-import-help" className="mt-2 text-xs leading-relaxed text-text-muted">
+                <p id="text-import-help" className="mt-1.5 text-[11px] leading-relaxed text-text-muted">
                   Hỗ trợ đáp án A–Z, nhiều đáp án như AC hoặc A,C, và nguyên văn nội dung đáp án đúng.
                 </p>
               </div>
 
-              <div className="grid gap-4 rounded-2xl border border-border bg-background p-4 sm:grid-cols-2">
+              <div className="grid gap-3.5 rounded-2xl border border-border bg-surface-2/60 p-4 sm:grid-cols-2">
                 <label className="block">
-                  <span className="mb-2 block text-xs font-bold text-text-muted">
+                  <span className="mb-1.5 block text-xs font-bold text-text-muted">
                     Giữa câu hỏi và đáp án
                   </span>
                   <select
                     value={termSeparatorMode}
                     onChange={(event) => setTermSeparatorMode(event.target.value)}
-                    className="input px-3"
+                    className="input px-3 py-2 text-xs bg-surface"
                   >
                     {separatorOptions.map((option) => (
                       <option key={option.value} value={option.value}>{option.label}</option>
@@ -213,20 +213,20 @@ export function TextBankImportDialog({ open, onClose }: TextBankImportDialogProp
                       value={customTermSeparator}
                       onChange={(event) => setCustomTermSeparator(event.target.value)}
                       maxLength={8}
-                      className="input mt-2 px-3"
+                      className="input mt-2 px-3 py-1.5 text-xs bg-surface"
                       aria-label="Dấu phân cách câu hỏi và đáp án tùy chỉnh"
                     />
                   )}
                 </label>
 
                 <label className="block">
-                  <span className="mb-2 block text-xs font-bold text-text-muted">
+                  <span className="mb-1.5 block text-xs font-bold text-text-muted">
                     Giữa các câu hỏi
                   </span>
                   <select
                     value={rowSeparatorMode}
                     onChange={(event) => setRowSeparatorMode(event.target.value)}
-                    className="input px-3"
+                    className="input px-3 py-2 text-xs bg-surface"
                   >
                     {rowSeparatorOptions.map((option) => (
                       <option key={option.value} value={option.value}>{option.label}</option>
@@ -237,19 +237,19 @@ export function TextBankImportDialog({ open, onClose }: TextBankImportDialogProp
                       value={customRowSeparator}
                       onChange={(event) => setCustomRowSeparator(event.target.value)}
                       maxLength={8}
-                      className="input mt-2 px-3"
+                      className="input mt-2 px-3 py-1.5 text-xs bg-surface"
                       aria-label="Dấu phân cách giữa các câu hỏi tùy chỉnh"
                     />
                   )}
                 </label>
               </div>
 
-              <label className="choice-card flex items-start gap-3 px-4 py-3 text-sm">
+              <label className="choice-card flex items-start gap-3 p-3.5 rounded-xl text-xs sm:text-sm cursor-pointer">
                 <input
                   type="checkbox"
                   checked={removeDuplicates}
                   onChange={(event) => setRemoveDuplicates(event.target.checked)}
-                  className="mt-0.5 size-4 accent-primary"
+                  className="mt-0.5 size-4 accent-primary rounded cursor-pointer"
                 />
                 <span>
                   <span className="block font-semibold text-text">Lọc câu hỏi trùng nội dung</span>
@@ -259,43 +259,47 @@ export function TextBankImportDialog({ open, onClose }: TextBankImportDialogProp
             </div>
 
             <div className="min-w-0">
-              <div className="card sticky top-0 overflow-hidden">
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
+              <div className="elevated-card sticky top-0 overflow-hidden rounded-2xl">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/80 px-4 py-3 bg-surface-2/40">
                   <div>
-                    <h3 className="font-bold text-text">Xem trước</h3>
-                    <p className="text-xs text-text-muted">{parsed.rowCount} dòng được nhận diện</p>
+                    <h3 className="font-bold text-sm text-text">Bản xem trước trực tiếp</h3>
+                    <p className="text-[11px] text-text-muted">{parsed.rowCount} dòng nhận diện</p>
                   </div>
                   <div className="flex items-center gap-2 text-xs font-semibold">
-                    <span className="badge badge-success dark:bg-emerald-950/60 dark:text-emerald-300">
-                      <CheckCircle2 size={14} /> {prepared.report.usableMultipleChoice} hợp lệ
+                    <span className="badge badge-success">
+                      <CheckCircle2 size={13} /> {prepared.report.usableMultipleChoice} hợp lệ
                     </span>
                     {parsed.issues.length > 0 && (
-                      <span className="badge bg-amber-50 text-amber-700">
-                        <AlertTriangle size={14} /> {parsed.issues.length} lỗi
+                      <span className="badge badge-warning">
+                        <AlertTriangle size={13} /> {parsed.issues.length} lỗi
                       </span>
                     )}
                   </div>
                 </div>
 
-                <div className="max-h-[48vh] overflow-y-auto p-3 sm:max-h-[58vh]">
+                <div className="max-h-[46vh] overflow-y-auto p-3 sm:max-h-[54vh] space-y-2.5">
                   {!sourceText.trim() && (
-                    <div className="flex min-h-56 flex-col items-center justify-center px-6 text-center text-text-muted">
-                      <FileSpreadsheet size={42} className="mb-3 opacity-60" />
-                      <p className="font-semibold text-text">Dán dữ liệu hoặc chọn file TSV</p>
-                      <p className="mt-1 text-sm">Bản xem trước sẽ xuất hiện ngay tại đây.</p>
+                    <div className="flex min-h-52 flex-col items-center justify-center px-6 text-center text-text-muted">
+                      <FileSpreadsheet size={36} className="mb-2 text-text-muted/60" />
+                      <p className="font-bold text-sm text-text">Dán dữ liệu hoặc chọn file TSV</p>
+                      <p className="mt-0.5 text-xs">Bản xem trước sẽ xuất hiện ngay tại đây.</p>
                     </div>
                   )}
 
                   {prepared.questions.slice(0, 50).map((question, index) => (
-                    <article key={`${question.id}-${index}`} className="mb-3 rounded-xl border border-border bg-background p-3 last:mb-0">
-                      <p className="text-sm font-semibold leading-relaxed text-text">
-                        <span className="mr-1 text-primary">{index + 1}.</span>{question.question}
+                    <article key={`${question.id}-${index}`} className="rounded-xl border border-border bg-surface p-3 transition-colors">
+                      <p className="text-xs sm:text-sm font-bold leading-relaxed text-text">
+                        <span className="mr-1 text-primary">#{index + 1}.</span>{question.question}
                       </p>
                       <div className="mt-2 flex flex-wrap gap-1.5">
                         {question.options.map((option) => (
                           <span
                             key={option.key}
-                            className={`rounded-lg px-2 py-1 text-xs ${question.answerKeys?.includes(option.key) ? 'bg-emerald-50 font-semibold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300' : 'bg-surface-2 text-text-muted'}`}
+                            className={`rounded-lg px-2 py-1 text-xs ${
+                              question.answerKeys?.includes(option.key) 
+                                ? 'bg-emerald-50 font-bold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800' 
+                                : 'bg-surface-2 text-text-muted border border-border/50'
+                            }`}
                           >
                             {option.key}. {option.text}
                           </span>
@@ -305,9 +309,9 @@ export function TextBankImportDialog({ open, onClose }: TextBankImportDialogProp
                   ))}
 
                   {parsed.issues.slice(0, 20).map((issue) => (
-                    <div key={`${issue.row}-${issue.source}`} className="mb-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 last:mb-0">
-                      <p className="font-semibold">Dòng {issue.row}: {issue.message}</p>
-                      <p className="mt-1 truncate text-xs opacity-75">{issue.source}</p>
+                    <div key={`${issue.row}-${issue.source}`} className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+                      <p className="font-bold">Dòng {issue.row}: {issue.message}</p>
+                      <p className="mt-0.5 truncate text-[11px] opacity-75">{issue.source}</p>
                     </div>
                   ))}
                 </div>
@@ -316,21 +320,21 @@ export function TextBankImportDialog({ open, onClose }: TextBankImportDialogProp
           </div>
 
           {error && (
-            <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 dark:border-red-800 dark:bg-red-950/60 dark:text-red-300" role="alert">
+            <p className="mt-4 rounded-xl border border-danger/30 bg-danger-subtle px-4 py-2.5 text-xs font-semibold text-danger" role="alert">
               {error}
             </p>
           )}
         </div>
 
         <footer className="flex flex-shrink-0 items-center justify-between gap-3 border-t border-border bg-surface px-4 py-3 pb-[calc(.75rem+env(safe-area-inset-bottom))] sm:px-6 sm:pb-3">
-          <p className="hidden text-sm text-text-muted sm:block">
-            Sẽ tạo {prepared.report.usableMultipleChoice} câu hỏi dùng được.
+          <p className="hidden text-xs text-text-muted sm:block">
+            Sẽ tạo <strong className="text-primary">{prepared.report.usableMultipleChoice}</strong> câu hỏi trắc nghiệm hợp lệ.
           </p>
           <div className="ml-auto grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
             <button
               type="button"
               onClick={onClose}
-              className="btn btn-secondary px-5"
+              className="btn btn-secondary px-5 text-xs sm:text-sm font-semibold"
             >
               Hủy
             </button>
@@ -338,7 +342,7 @@ export function TextBankImportDialog({ open, onClose }: TextBankImportDialogProp
               type="button"
               onClick={handleImport}
               disabled={!prepared.report.usableMultipleChoice}
-              className="btn btn-primary px-6 disabled:cursor-not-allowed disabled:opacity-50"
+              className="btn btn-primary px-6 text-xs sm:text-sm font-bold shadow-md shadow-primary/25 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Nhập {prepared.report.usableMultipleChoice || ''} câu
             </button>
@@ -348,3 +352,5 @@ export function TextBankImportDialog({ open, onClose }: TextBankImportDialogProp
     </div>
   );
 }
+
+
