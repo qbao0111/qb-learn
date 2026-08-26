@@ -84,7 +84,7 @@ export function QuestionManager() {
                         return (
                           <div 
                             key={opt.key} 
-                            className={`px-4 py-2 rounded-lg border ${isCorrect ? 'bg-green-50 border-green-200 text-green-900 font-medium' : 'bg-surface-2 border-transparent text-text-muted'}`}
+                            className={`px-4 py-2 rounded-lg border ${isCorrect ? 'bg-green-50 border-green-200 text-green-900 font-medium dark:bg-green-950/60 dark:border-green-800 dark:text-green-100' : 'bg-surface-2 border-transparent text-text-muted'}`}
                           >
                             <span className="font-bold mr-2">{opt.key}.</span>
                             {opt.text}
@@ -93,7 +93,7 @@ export function QuestionManager() {
                       })}
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2 text-orange-500 mb-4 text-sm bg-orange-50 px-3 py-2 rounded-lg inline-flex">
+                    <div className="flex items-center gap-2 text-orange-500 mb-4 text-sm bg-orange-50 px-3 py-2 rounded-lg inline-flex dark:bg-orange-950/50 dark:text-orange-300">
                       <AlertTriangle size={16} />
                       Câu hỏi không có đáp án trắc nghiệm
                     </div>
@@ -111,7 +111,7 @@ export function QuestionManager() {
                   </button>
                   <button
                     onClick={() => handleDelete(q.id)}
-                    className="p-2 text-text-muted hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    className="p-2 text-text-muted hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors dark:hover:bg-red-950/50 dark:hover:text-red-300"
                     title="Xoá câu hỏi"
                   >
                     <Trash2 size={20} />

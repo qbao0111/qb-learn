@@ -343,7 +343,7 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
                   <img
                     src={imagePreviewUrl}
                     alt="Ảnh câu hỏi đang được nhận diện"
-                    className="h-24 w-full rounded-xl border border-border bg-white object-contain sm:w-40"
+                    className="h-24 w-full rounded-xl border border-border bg-surface-2 object-contain sm:w-40"
                   />
                 ) : (
                   <div className="flex h-24 w-full shrink-0 items-center justify-center rounded-xl border border-border bg-surface sm:w-40">
@@ -403,9 +403,9 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
               <div
                 className={`mt-3 flex items-center gap-2 text-sm ${
                   ocrState.type === 'error'
-                    ? 'text-red-600'
+                    ? 'text-red-600 dark:text-red-400'
                     : ocrState.type === 'success'
-                      ? 'text-emerald-700'
+                      ? 'text-emerald-700 dark:text-emerald-300'
                       : 'text-text-muted'
                 }`}
                 role={ocrState.type === 'error' ? 'alert' : 'status'}
@@ -421,24 +421,24 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
 
           <section aria-labelledby="illustration-title">
             <div className="mb-3 flex items-center gap-2">
-              <ImagePlus className="text-emerald-600" size={20} aria-hidden="true" />
+              <ImagePlus className="text-emerald-600 dark:text-emerald-300" size={20} aria-hidden="true" />
               <h3 id="illustration-title" className="text-sm font-bold text-text">
                 Ảnh minh hoạ cho câu hỏi
               </h3>
-              <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
+              <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
                 Tuỳ chọn
               </span>
             </div>
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/40 p-4">
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/40 p-4 dark:border-emerald-800 dark:bg-emerald-950/30">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                 {illustrationPreviewUrl ? (
                   <img
                     src={illustrationPreviewUrl}
                     alt="Ảnh minh hoạ đang gắn với câu hỏi"
-                    className="h-28 w-full rounded-xl border border-emerald-200 bg-white object-contain p-1 sm:w-44"
+                    className="h-28 w-full rounded-xl border border-emerald-200 bg-surface-2 object-contain p-1 sm:w-44 dark:border-emerald-800"
                   />
                 ) : (
-                  <div className="flex h-28 w-full shrink-0 items-center justify-center rounded-xl border border-dashed border-emerald-300 bg-white sm:w-44">
+                  <div className="flex h-28 w-full shrink-0 items-center justify-center rounded-xl border border-dashed border-emerald-300 bg-surface-2 sm:w-44 dark:border-emerald-700">
                     <ImagePlus size={30} className="text-emerald-500" aria-hidden="true" />
                   </div>
                 )}
@@ -472,7 +472,7 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
                     <button
                       type="button"
                       onClick={() => void handleIllustrationClipboard()}
-                      className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-white px-3.5 py-2 text-sm font-semibold text-emerald-800 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                      className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-white px-3.5 py-2 text-sm font-semibold text-emerald-800 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-emerald-800 dark:bg-surface-2 dark:text-emerald-300 dark:hover:bg-emerald-950/50"
                     >
                       <ClipboardPaste size={16} aria-hidden="true" />
                       Dán ảnh minh hoạ
@@ -481,7 +481,7 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
                       <button
                         type="button"
                         onClick={removeImage}
-                        className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2 text-sm font-semibold text-red-700 transition-colors hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                        className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2 text-sm font-semibold text-red-700 transition-colors hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 dark:border-red-800 dark:bg-red-950/50 dark:text-red-300 dark:hover:bg-red-950/80"
                       >
                         <X size={16} aria-hidden="true" />
                         Xoá ảnh minh hoạ

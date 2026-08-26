@@ -145,7 +145,7 @@ export function ExamMode() {
             </div>
             <div className="h-20 w-px bg-border"></div>
             <div>
-              <div className={`text-5xl font-black mb-2 ${percent >= 80 ? 'text-green-500' : percent >= 50 ? 'text-orange-500' : 'text-red-500'}`}>
+              <div className={`text-5xl font-black mb-2 ${percent >= 80 ? 'text-green-500 dark:text-green-400' : percent >= 50 ? 'text-orange-500 dark:text-orange-400' : 'text-red-500 dark:text-red-400'}`}>
                 {percent}%
               </div>
               <div className="text-text-muted">Độ chính xác</div>
@@ -174,7 +174,7 @@ export function ExamMode() {
               .join(' · ');
             
             return (
-              <div key={q.id} className={`bg-surface border rounded-2xl p-6 ${isCorrect ? 'border-green-200 bg-green-50/30' : 'border-red-200 bg-red-50/30'}`}>
+              <div key={q.id} className={`bg-surface border rounded-2xl p-6 ${isCorrect ? 'border-green-200 bg-green-50/30 dark:border-green-800 dark:bg-green-950/30' : 'border-red-200 bg-red-50/30 dark:border-red-800 dark:bg-red-950/30'}`}>
                 <div className="flex gap-4">
                   <div className="mt-1">
                     {isCorrect ? <CheckCircle2 className="text-green-500" /> : <XCircle className="text-red-500" />}
@@ -194,9 +194,9 @@ export function ExamMode() {
                         
                         let optClass = "p-3 rounded-lg border text-sm ";
                         if (isThisCorrect) {
-                          optClass += "bg-green-100 border-green-300 text-green-900 font-semibold";
+                          optClass += "bg-green-100 border-green-300 text-green-900 font-semibold dark:bg-green-950/60 dark:border-green-700 dark:text-green-100";
                         } else if (isThisSelected && !isThisCorrect) {
-                          optClass += "bg-red-100 border-red-300 text-red-900";
+                          optClass += "bg-red-100 border-red-300 text-red-900 dark:bg-red-950/60 dark:border-red-700 dark:text-red-100";
                         } else {
                           optClass += "bg-surface border-border opacity-60";
                         }
@@ -210,7 +210,7 @@ export function ExamMode() {
                     </div>
                     
                     {!isCorrect && (
-                      <div className="bg-white p-3 rounded-lg border border-border text-sm">
+                      <div className="bg-surface-2 p-3 rounded-lg border border-border text-sm">
                         <span className="font-semibold text-text-muted">Đáp án đúng:</span> {correctAnswerText}
                       </div>
                     )}
