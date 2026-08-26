@@ -81,14 +81,14 @@ export function ExamMode() {
 
   if (examState === 'setup') {
     return (
-      <div className="w-full max-w-xl mx-auto bg-surface border border-border rounded-2xl p-8 shadow-sm mt-8">
-        <h2 className="text-2xl font-bold mb-6 text-text flex items-center gap-3">
+      <div className="card mx-auto mt-8 w-full max-w-xl p-5 sm:p-8">
+        <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold leading-tight text-text">
           Thiết lập bài kiểm tra
         </h2>
         
         <div className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-text-muted mb-2">
+            <label className="mb-2 block text-sm font-semibold text-text-secondary">
               Số lượng câu hỏi (tối đa {maxQuestions})
             </label>
             <input 
@@ -97,12 +97,12 @@ export function ExamMode() {
               max={maxQuestions}
               value={numQuestions}
               onChange={(e) => setNumQuestions(Number(e.target.value))}
-              className="w-full bg-surface-2 border border-border rounded-xl px-4 py-3 text-text focus:outline-none focus:border-primary"
+              className="input px-4 py-3"
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-text-muted mb-2">
+            <label className="mb-2 block text-sm font-semibold text-text-secondary">
               Thời gian làm bài (Phút)
             </label>
             <input 
@@ -111,13 +111,13 @@ export function ExamMode() {
               max="180"
               value={timeLimit}
               onChange={(e) => setTimeLimit(Number(e.target.value))}
-              className="w-full bg-surface-2 border border-border rounded-xl px-4 py-3 text-text focus:outline-none focus:border-primary"
+              className="input px-4 py-3"
             />
           </div>
           
           <button 
             onClick={startExam}
-            className="w-full py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary-hover transition-colors shadow-lg shadow-primary/25 mt-4"
+            className="btn btn-primary mt-4 w-full py-4 text-base"
           >
             Bắt đầu làm bài
           </button>
@@ -133,28 +133,28 @@ export function ExamMode() {
     const s = timeSpent % 60;
 
     return (
-      <div className="w-full max-w-3xl mx-auto space-y-8 pb-12">
-        <div className="bg-surface border border-border rounded-2xl p-8 text-center shadow-sm">
-          <h2 className="text-3xl font-bold mb-2">Kết quả bài thi</h2>
-          <p className="text-text-muted mb-8">Thời gian hoàn thành: {m} phút {s} giây</p>
+      <div className="mx-auto w-full max-w-3xl space-y-8 pb-12">
+        <div className="card p-6 text-center sm:p-8">
+          <h2 className="mb-2 text-3xl font-bold leading-tight">Kết quả bài thi</h2>
+          <p className="mb-8 text-text-secondary">Thời gian hoàn thành: {m} phút {s} giây</p>
           
-          <div className="flex items-center justify-center gap-12 mb-8">
+          <div className="mb-8 flex items-center justify-center gap-8 sm:gap-12">
             <div>
-              <div className="text-5xl font-black text-primary mb-2">{score}/{examQuestions.length}</div>
-              <div className="text-text-muted">Câu đúng</div>
+              <div className="mb-2 text-5xl font-bold text-primary">{score}/{examQuestions.length}</div>
+              <div className="font-medium text-text-muted">Câu đúng</div>
             </div>
             <div className="h-20 w-px bg-border"></div>
             <div>
-              <div className={`text-5xl font-black mb-2 ${percent >= 80 ? 'text-green-500 dark:text-green-400' : percent >= 50 ? 'text-orange-500 dark:text-orange-400' : 'text-red-500 dark:text-red-400'}`}>
+                <div className={`mb-2 text-5xl font-bold ${percent >= 80 ? 'text-emerald-600 dark:text-emerald-400' : percent >= 50 ? 'text-orange-500 dark:text-orange-400' : 'text-red-500 dark:text-red-400'}`}>
                 {percent}%
               </div>
-              <div className="text-text-muted">Độ chính xác</div>
+              <div className="font-medium text-text-muted">Độ chính xác</div>
             </div>
           </div>
           
           <button 
             onClick={() => setExamState('setup')}
-            className="px-8 py-3 bg-surface-2 text-text font-medium rounded-xl hover:bg-border transition-colors mr-4"
+            className="btn btn-secondary px-8 py-3"
           >
             Làm bài mới
           </button>
@@ -174,10 +174,10 @@ export function ExamMode() {
               .join(' · ');
             
             return (
-              <div key={q.id} className={`bg-surface border rounded-2xl p-6 ${isCorrect ? 'border-green-200 bg-green-50/30 dark:border-green-800 dark:bg-green-950/30' : 'border-red-200 bg-red-50/30 dark:border-red-800 dark:bg-red-950/30'}`}>
+                <div key={q.id} className={`rounded-2xl border p-5 sm:p-6 ${isCorrect ? 'border-emerald-200 bg-emerald-50/30 dark:border-emerald-800 dark:bg-emerald-950/30' : 'border-red-200 bg-red-50/30 dark:border-red-800 dark:bg-red-950/30'}`}>
                 <div className="flex gap-4">
                   <div className="mt-1">
-                    {isCorrect ? <CheckCircle2 className="text-green-500" /> : <XCircle className="text-red-500" />}
+                    {isCorrect ? <CheckCircle2 className="text-emerald-600" /> : <XCircle className="text-red-500" />}
                   </div>
                   <div className="flex-1">
                     <p className="font-bold mb-4">Câu {idx + 1}: {q.question}</p>
@@ -194,7 +194,7 @@ export function ExamMode() {
                         
                         let optClass = "p-3 rounded-lg border text-sm ";
                         if (isThisCorrect) {
-                          optClass += "bg-green-100 border-green-300 text-green-900 font-semibold dark:bg-green-950/60 dark:border-green-700 dark:text-green-100";
+                            optClass += "bg-emerald-50 border-emerald-300 text-emerald-900 font-semibold dark:bg-emerald-950/60 dark:border-emerald-700 dark:text-emerald-100";
                         } else if (isThisSelected && !isThisCorrect) {
                           optClass += "bg-red-100 border-red-300 text-red-900 dark:bg-red-950/60 dark:border-red-700 dark:text-red-100";
                         } else {
@@ -230,10 +230,10 @@ export function ExamMode() {
   const answeredCount = Object.values(answers).filter((keys) => keys.length > 0).length;
 
   return (
-    <div className="w-full max-w-3xl mx-auto relative pb-24">
+    <div className="relative mx-auto w-full max-w-3xl pb-24">
       {/* Sticky Header */}
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border py-4 mb-8 flex items-center justify-between">
-        <div className="font-medium text-text-muted">
+      <div className="sticky top-0 z-10 mb-8 flex items-center justify-between gap-3 border-b border-border bg-background/88 py-4 backdrop-blur-md">
+        <div className="font-semibold text-text-muted">
           Đã làm: <span className="text-primary font-bold">{answeredCount}/{examQuestions.length}</span>
         </div>
         <div className={`flex items-center gap-2 font-bold text-lg ${timeLeft < 300 ? 'text-red-500 animate-pulse' : 'text-text'}`}>
@@ -244,7 +244,7 @@ export function ExamMode() {
           onClick={() => {
             if (confirm('Bạn có chắc chắn muốn nộp bài?')) handleSubmit();
           }}
-          className="px-6 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary-hover"
+          className="btn btn-primary px-5 py-2"
         >
           Nộp bài
         </button>
@@ -258,8 +258,8 @@ export function ExamMode() {
           const selectedKeys = answers[q.id] ?? [];
 
           return (
-          <div key={q.id} className="bg-surface border border-border rounded-2xl p-8 shadow-sm">
-            <h3 className="text-xl font-bold text-text mb-6">
+          <div key={q.id} className="card p-5 sm:p-8">
+            <h3 className="mb-6 text-xl font-bold leading-relaxed text-text">
               Câu {idx + 1}: <span className="font-normal">{q.question}</span>
             </h3>
             {q.imageDataUrl && (
@@ -268,7 +268,7 @@ export function ExamMode() {
               </div>
             )}
             {isMultiple && (
-              <p className="mb-4 inline-flex rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">
+              <p className="badge badge-primary mb-4">
                 Chọn {correctKeys.length} đáp án
               </p>
             )}
@@ -278,7 +278,7 @@ export function ExamMode() {
                 return (
                   <label 
                     key={opt.key}
-                    className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-colors ${isSelected ? 'border-primary bg-primary/5' : 'border-border hover:bg-surface-2'}`}
+                    className={`choice-card flex cursor-pointer items-center gap-4 p-4 ${isSelected ? 'border-primary bg-primary-subtle text-primary' : 'text-text'}`}
                   >
                     <input 
                       type={isMultiple ? 'checkbox' : 'radio'}
@@ -295,7 +295,7 @@ export function ExamMode() {
                           : [...current, opt.key];
                         return { ...previous, [q.id]: next };
                       })}
-                      className="w-5 h-5 text-primary focus:ring-primary"
+                      className="h-5 w-5 accent-primary focus:ring-primary"
                     />
                     <div className="flex-1 text-base">
                       <strong className="mr-2 text-primary">{opt.key}.</strong>

@@ -297,14 +297,14 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-sm"
     >
       <div
-        className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border border-border bg-surface shadow-2xl"
+        className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl"
         role="dialog"
         aria-modal="true"
         aria-labelledby="question-editor-title"
       >
         <div className="flex items-center justify-between border-b border-border px-6 py-5">
           <div>
-            <p className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-primary">
+            <p className="mb-1 text-xs font-bold text-primary">
               Quản lý dữ liệu
             </p>
             <h2 id="question-editor-title" className="text-2xl font-bold text-text">
@@ -314,7 +314,7 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-xl p-2 text-text-muted transition-colors hover:bg-surface-2 hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="icon-btn"
             aria-label="Đóng cửa sổ"
           >
             <X size={22} />
@@ -334,7 +334,7 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
             </div>
 
             <div
-              className="rounded-2xl border border-dashed border-primary/35 bg-primary/[0.035] p-4 transition-colors hover:border-primary/60"
+              className="rounded-2xl border border-dashed border-primary/35 bg-primary-subtle/50 p-4 transition-colors hover:border-primary/60"
               onDragOver={(event) => event.preventDefault()}
               onDrop={handleDrop}
             >
@@ -374,7 +374,7 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
                       type="button"
                       onClick={() => inputRef.current?.click()}
                       disabled={ocrState.type === 'loading'}
-                      className="inline-flex items-center gap-2 rounded-xl bg-primary px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-60"
+                      className="btn btn-primary min-h-10 px-3.5 py-2 disabled:cursor-wait"
                     >
                       <Upload size={16} aria-hidden="true" />
                       Tải ảnh lên
@@ -383,7 +383,7 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
                       type="button"
                       onClick={() => void handleClipboardButton()}
                       disabled={ocrState.type === 'loading'}
-                      className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-3.5 py-2 text-sm font-semibold text-text transition-colors hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-wait disabled:opacity-60"
+                      className="btn btn-secondary min-h-10 px-3.5 py-2 disabled:cursor-wait"
                     >
                       <ClipboardPaste size={16} aria-hidden="true" />
                       Dán từ clipboard
@@ -464,7 +464,7 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
                     <button
                       type="button"
                       onClick={() => illustrationInputRef.current?.click()}
-                      className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+                      className="btn min-h-10 bg-emerald-600 px-3.5 py-2 text-white hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
                     >
                       <Upload size={16} aria-hidden="true" />
                       Tải ảnh minh hoạ
@@ -472,7 +472,7 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
                     <button
                       type="button"
                       onClick={() => void handleIllustrationClipboard()}
-                      className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-white px-3.5 py-2 text-sm font-semibold text-emerald-800 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-emerald-800 dark:bg-surface-2 dark:text-emerald-300 dark:hover:bg-emerald-950/50"
+                        className="btn min-h-10 border border-emerald-200 bg-white px-3.5 py-2 text-emerald-800 hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-emerald-800 dark:bg-surface-2 dark:text-emerald-300 dark:hover:bg-emerald-950/50"
                     >
                       <ClipboardPaste size={16} aria-hidden="true" />
                       Dán ảnh minh hoạ
@@ -481,7 +481,7 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
                       <button
                         type="button"
                         onClick={removeImage}
-                        className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2 text-sm font-semibold text-red-700 transition-colors hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 dark:border-red-800 dark:bg-red-950/50 dark:text-red-300 dark:hover:bg-red-950/80"
+                          className="btn btn-danger min-h-10 px-3.5 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 dark:border-red-800 dark:bg-red-950/50 dark:text-red-300 dark:hover:bg-red-950/80"
                       >
                         <X size={16} aria-hidden="true" />
                         Xoá ảnh minh hoạ
@@ -502,7 +502,7 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
               value={questionText}
               onChange={(event) => setQuestionText(event.target.value)}
               placeholder="Nhập nội dung câu hỏi..."
-              className="h-28 w-full resize-none rounded-xl border border-border bg-surface-2 px-4 py-3 outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/15"
+              className="input h-28 resize-none px-4 py-3"
             />
           </div>
 
@@ -513,7 +513,7 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
                 type="button"
                 onClick={removeLastOption}
                 disabled={options.length <= 2}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-semibold text-text-muted transition-colors hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-40"
+                className="btn btn-secondary min-h-9 rounded-lg px-2.5 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <Trash2 size={14} aria-hidden="true" />
                 Bớt lựa chọn
@@ -522,7 +522,7 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
                 type="button"
                 onClick={addOption}
                 disabled={options.length >= 26}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/5 px-2.5 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-40"
+                className="btn btn-secondary min-h-9 rounded-lg px-2.5 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <Plus size={14} aria-hidden="true" />
                 Thêm lựa chọn
@@ -542,7 +542,7 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
                   value={option.text}
                   onChange={(event) => handleOptionChange(option.key, event.target.value)}
                   placeholder={`Nhập lựa chọn ${option.key}...`}
-                  className="flex-1 rounded-xl border border-border bg-surface-2 px-4 py-2.5 outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/15"
+                  className="input flex-1 bg-background px-4 py-2.5"
                 />
               </div>
             ))}
@@ -560,10 +560,10 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
               {options.map((option) => (
                 <label
                   key={option.key}
-                  className={`flex cursor-pointer items-center justify-center rounded-xl border px-3 py-3 font-bold transition-colors ${
+                  className={`flex min-h-11 cursor-pointer items-center justify-center rounded-xl border px-3 py-3 font-bold transition-colors ${
                     selectedAnswers.includes(option.key)
                       ? 'border-primary bg-primary text-white'
-                      : 'border-border bg-surface text-text hover:bg-surface-2'
+                      : 'border-border bg-surface text-text hover:bg-surface-hover'
                   }`}
                 >
                   <input
@@ -584,7 +584,7 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-xl px-5 py-2.5 font-medium text-text-muted transition-colors hover:bg-surface-2 hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="btn btn-ghost px-5"
           >
             Huỷ
           </button>
@@ -592,7 +592,7 @@ export function QuestionEditor({ initialData, onSave, onCancel }: QuestionEditor
             type="button"
             onClick={handleSave}
             disabled={ocrState.type === 'loading'}
-            className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-60"
+            className="btn btn-primary px-5 disabled:cursor-wait"
           >
             <Check size={18} aria-hidden="true" />
             Lưu câu hỏi

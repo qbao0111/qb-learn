@@ -90,11 +90,11 @@ export function FlashcardMode() {
   const isFinished = flashIndex === sessionQuestions.length - 1;
 
   return (
-    <div className="w-full max-w-5xl mx-auto flex flex-col items-center h-full">
+    <div className="mx-auto flex h-full w-full max-w-5xl flex-col items-center">
       {/* Progress */}
-      <div className="w-full flex items-center justify-between mb-8">
-        <span className="font-semibold text-primary">{flashIndex + 1} / {sessionQuestions.length}</span>
-        <div className="flex-1 mx-6 h-2 bg-surface-2 rounded-full overflow-hidden">
+      <div className="mb-6 flex w-full items-center justify-between gap-3 sm:mb-8">
+        <span className="badge badge-primary shrink-0">{flashIndex + 1} / {sessionQuestions.length}</span>
+        <div className="h-2 flex-1 overflow-hidden rounded-full bg-surface-2">
           <div 
             className="h-full bg-primary rounded-full transition-all duration-300"
             style={{ width: `${((flashIndex + 1) / sessionQuestions.length) * 100}%` }}
@@ -102,7 +102,7 @@ export function FlashcardMode() {
         </div>
         <button 
           onClick={() => setSettings(null)}
-          className="p-2 text-text-muted hover:text-primary transition-colors flex items-center gap-2 text-sm"
+          className="btn btn-ghost shrink-0 px-3"
           title="Thiết lập lại"
         >
           <RefreshCw size={18} />
@@ -114,27 +114,27 @@ export function FlashcardMode() {
       {activeQuestion && <Flashcard3D question={activeQuestion} index={flashIndex} />}
       
       {/* Controls */}
-      <div className="flex items-center gap-6 mt-12">
+      <div className="mt-10 flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center">
         <button 
           onClick={handlePrev}
           disabled={flashIndex === 0}
-          className="px-6 py-3 rounded-xl font-medium bg-surface border border-border hover:bg-surface-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+          className="btn btn-secondary px-6 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Câu trước <span className="text-text-muted text-sm font-normal">(←)</span>
         </button>
         {isFinished ? (
           <button 
             onClick={() => setSettings(null)}
-            className="px-6 py-3 rounded-xl font-medium bg-green-600 text-white hover:bg-green-700 transition-all shadow-lg shadow-green-600/25"
+            className="btn bg-emerald-600 px-6 text-white shadow-[0_8px_18px_rgba(5,150,105,0.18)] hover:bg-emerald-700"
           >
             Hoàn thành
           </button>
         ) : (
           <button 
             onClick={handleNext}
-            className="px-6 py-3 rounded-xl font-medium bg-primary text-white hover:bg-primary-hover transition-all shadow-lg shadow-primary/25 flex items-center gap-2"
+            className="btn btn-primary px-6"
           >
-            Câu tiếp <span className="text-primary-foreground/70 text-sm font-normal">(→)</span>
+            Câu tiếp <span className="text-sm font-normal text-white/75">(→)</span>
           </button>
         )}
       </div>

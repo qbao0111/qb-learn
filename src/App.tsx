@@ -68,30 +68,34 @@ function App() {
   const toggleTheme = () => setTheme(current => current === 'dark' ? 'light' : 'dark');
 
   return (
-    <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-background">
+    <div className="app-shell flex h-dvh min-h-0 w-full max-w-full overflow-hidden">
       {/* SIDEBAR */}
-      <aside className="hidden w-64 flex-shrink-0 flex-col border-r border-border bg-surface md:flex">
-        <div className="p-6">
+      <aside className="hidden w-64 flex-shrink-0 flex-col border-r border-border bg-surface/96 md:flex">
+        <div className="px-5 pb-5 pt-6">
           <div className="flex items-center gap-3">
-            <div className="bg-primary text-white p-2 rounded-lg">
-              <Layers size={24} />
+            <div className="rounded-2xl bg-primary p-2.5 text-white shadow-[0_10px_22px_rgba(66,85,255,0.2)]">
+              <Layers size={23} strokeWidth={2.25} />
             </div>
-            <h1 className="font-bold text-xl text-text">QB Learn</h1>
+            <div>
+              <h1 className="text-xl font-bold leading-tight text-text">QB Learn</h1>
+              <p className="text-xs font-medium text-text-muted">Học gọn hơn mỗi ngày</p>
+            </div>
           </div>
         </div>
 
-        <nav className="mt-4 flex-1 space-y-2 px-4">
+        <nav className="flex-1 space-y-1.5 px-3" aria-label="Điều hướng chính">
           {navigation.map((item) => {
             const Icon = item.icon;
             return (
               <div key={item.id}>
-                {item.id === 'manage' && <div className="my-2 border-t border-border" />}
+                {item.id === 'manage' && <div className="my-3 border-t border-border" />}
                 <button
                   type="button"
                   onClick={() => setMode(item.id)}
-                  className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 font-medium transition-colors ${mode === item.id ? 'bg-primary/10 text-primary' : 'text-text-muted hover:bg-surface-2 hover:text-text'}`}
+                  className={`flex min-h-11 w-full items-center gap-3 rounded-xl px-3.5 text-sm font-semibold transition-all duration-200 ${mode === item.id ? 'bg-primary-subtle text-primary shadow-[inset_0_0_0_1px_rgba(66,85,255,0.08)]' : 'text-text-secondary hover:bg-surface-hover hover:text-text'}`}
+                  aria-current={mode === item.id ? 'page' : undefined}
                 >
-                  <Icon size={20} />
+                  <Icon size={20} strokeWidth={mode === item.id ? 2.35 : 2} />
                   {item.label}
                 </button>
               </div>
@@ -103,9 +107,9 @@ function App() {
       {/* MAIN CONTENT */}
       <main className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
         {/* MOBILE HEADER */}
-        <header className="flex h-14 flex-shrink-0 items-center justify-between border-b border-border bg-surface px-4 pt-[env(safe-area-inset-top)] md:hidden">
+        <header className="flex h-14 flex-shrink-0 items-center justify-between border-b border-border bg-surface/96 px-4 pt-[env(safe-area-inset-top)] md:hidden">
           <div className="flex min-w-0 items-center gap-2.5">
-            <div className="rounded-lg bg-primary p-1.5 text-white">
+            <div className="rounded-xl bg-primary p-1.5 text-white">
               <Layers size={20} />
             </div>
             <div className="min-w-0">
@@ -117,7 +121,7 @@ function App() {
             <button
               type="button"
               onClick={toggleTheme}
-              className="flex size-11 items-center justify-center rounded-full text-text-muted transition-colors active:bg-surface-2 active:text-text"
+              className="icon-btn"
               aria-label={theme === 'dark' ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}
               title={theme === 'dark' ? 'Giao diện sáng' : 'Giao diện tối'}
             >
@@ -126,7 +130,7 @@ function App() {
             <button
               type="button"
               onClick={toggleSound}
-              className={`flex size-11 items-center justify-center rounded-full transition-colors ${soundEnabled ? 'text-primary active:bg-primary/10' : 'text-text-muted active:bg-surface-2'}`}
+              className={`icon-btn ${soundEnabled ? 'text-primary' : ''}`}
               aria-label={soundEnabled ? 'Tắt âm thanh' : 'Bật âm thanh'}
             >
               {soundEnabled ? <Volume2 size={21} /> : <VolumeX size={21} />}
@@ -135,20 +139,21 @@ function App() {
         </header>
 
         {/* HEADER */}
-        <header className="hidden h-16 flex-shrink-0 items-center justify-between border-b border-border bg-surface px-8 md:flex">
-          <h2 className="text-lg font-semibold text-text">{pageTitles[mode]}</h2>
-          <div className="flex items-center gap-4">
+        <header className="hidden h-16 flex-shrink-0 items-center justify-between border-b border-border bg-surface/92 px-8 backdrop-blur md:flex">
+          <h2 className="text-lg font-bold text-text">{pageTitles[mode]}</h2>
+          <div className="flex items-center gap-2">
             <button 
               onClick={toggleSound}
-              className={`p-2 rounded-full transition-colors ${soundEnabled ? 'text-primary hover:bg-primary/10' : 'text-text-muted hover:bg-surface-2 hover:text-text'}`}
+              className={`icon-btn ${soundEnabled ? 'text-primary' : ''}`}
               title={soundEnabled ? "Tắt âm thanh" : "Bật âm thanh"}
+              aria-label={soundEnabled ? 'Tắt âm thanh' : 'Bật âm thanh'}
             >
               {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
             </button>
             <button
               type="button"
               onClick={toggleTheme}
-              className="rounded-full p-2 text-text-muted transition-colors hover:bg-surface-2 hover:text-text"
+              className="icon-btn"
               aria-label={theme === 'dark' ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}
               title={theme === 'dark' ? 'Giao diện sáng' : 'Giao diện tối'}
             >
@@ -158,7 +163,7 @@ function App() {
         </header>
 
         {/* CONTENT AREA */}
-        <div className="flex flex-1 flex-col items-center overflow-x-hidden overflow-y-auto px-3 py-3 pb-[calc(5.25rem+env(safe-area-inset-bottom))] sm:px-6 sm:py-4 md:pb-4">
+        <div className="flex max-w-full flex-1 flex-col items-center overflow-x-hidden overflow-y-auto px-3 py-4 pb-[calc(5.25rem+env(safe-area-inset-bottom))] sm:px-6 md:pb-5">
           {mode === 'overview' && <Overview />}
           
           {mode === 'flashcards' && <FlashcardMode />}
@@ -171,7 +176,7 @@ function App() {
 
       {/* MOBILE NAVIGATION */}
       <nav
-        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-surface/95 px-1 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_8px_rgba(15,23,42,0.06)] backdrop-blur-xl md:hidden dark:shadow-none"
+        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-surface/96 px-1 pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_30px_rgba(37,44,97,0.08)] backdrop-blur-xl md:hidden dark:shadow-none"
         aria-label="Điều hướng chính"
       >
         {navigation.map((item) => {
@@ -182,10 +187,10 @@ function App() {
               key={item.id}
               type="button"
               onClick={() => setMode(item.id)}
-              className={`flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 text-[11px] font-semibold transition-colors ${active ? 'text-primary' : 'text-text-muted active:bg-surface-2'}`}
+              className={`flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 text-[11px] font-semibold transition-colors ${active ? 'text-primary' : 'text-text-muted active:bg-surface-hover'}`}
               aria-current={active ? 'page' : undefined}
             >
-              <span className={`flex h-8 w-12 items-center justify-center rounded-full ${active ? 'bg-primary/10' : ''}`}>
+              <span className={`flex h-8 w-12 items-center justify-center rounded-full ${active ? 'bg-primary-subtle' : ''}`}>
                 <Icon size={21} strokeWidth={active ? 2.4 : 2} />
               </span>
               <span className="w-full truncate text-center leading-none">{item.mobileLabel}</span>

@@ -181,21 +181,23 @@ export function Overview() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-5 pb-6 sm:space-y-8 sm:pb-12">
+    <div className="mx-auto w-full max-w-5xl space-y-5 overflow-x-hidden pb-6 sm:space-y-7 sm:pb-12">
       {/* Upload Section */}
-      <section className="rounded-2xl border border-border bg-surface p-4 shadow-sm sm:p-8">
+      <section className="card p-4 sm:p-7">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h3 className="mb-2 flex items-center gap-2 text-xl font-bold text-text">
-              <Upload className="text-primary" />
+            <h3 className="mb-2 flex items-center gap-2.5 text-2xl font-bold leading-tight text-text">
+              <span className="flex size-10 items-center justify-center rounded-2xl bg-primary-subtle text-primary">
+                <Upload size={21} />
+              </span>
               Tạo bộ đề mới
             </h3>
-            <p className="text-text-muted">Nhập từ PDF Quizlet hoặc dán dữ liệu dạng bảng.</p>
+            <p className="text-sm leading-6 text-text-secondary">Nhập từ PDF Quizlet hoặc dán dữ liệu dạng bảng.</p>
           </div>
           <button
             type="button"
             onClick={() => setTextImportOpen(true)}
-            className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-primary/25 bg-primary/5 px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="btn btn-secondary shrink-0"
           >
             <FileSpreadsheet size={19} />
             Nhập văn bản / TSV
@@ -203,7 +205,7 @@ export function Overview() {
         </div>
         
         <div
-          className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-colors sm:p-10 ${isDragging ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}
+          className={`flex min-w-0 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-6 text-center transition-all duration-200 sm:p-10 ${isDragging ? 'border-primary bg-primary-subtle shadow-[inset_0_0_0_1px_rgba(66,85,255,0.12)]' : 'border-border bg-background hover:border-primary/45 hover:bg-primary-subtle/60'}`}
           onDragOver={onDragOver}
           onDragLeave={onDragLeave}
           onDrop={onDrop}
@@ -222,8 +224,10 @@ export function Overview() {
             ref={fileInputRef}
             onChange={(e) => applySelectedFile(e.target.files?.[0])}
           />
-          <FileText size={48} className={`mb-4 ${isDragging ? 'text-primary' : 'text-text-muted'}`} />
-          <p className="font-medium text-text mb-1">Kéo thả file PDF vào đây hoặc Click để chọn</p>
+          <div className={`mb-4 flex size-14 items-center justify-center rounded-2xl ${isDragging ? 'bg-primary text-white' : 'bg-surface text-primary shadow-sm'}`}>
+            <FileText size={28} />
+          </div>
+          <p className="mb-1 w-full max-w-[17rem] text-wrap px-1 text-base font-bold leading-6 text-text sm:max-w-full">Kéo thả file PDF vào đây hoặc Click để chọn</p>
           <p className="text-sm text-text-muted">Chỉ hỗ trợ định dạng PDF (.pdf)</p>
         </div>
 
@@ -235,18 +239,18 @@ export function Overview() {
                 value={bankName}
                 onChange={(event) => setBankName(event.target.value)}
                 placeholder="Bộ đề chưa đặt tên"
-                className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-text outline-none transition-colors focus:border-primary"
+                className="input px-4 py-3"
               />
             </label>
             <button
               type="button"
               onClick={handleImport}
               disabled={isLoading}
-              className="rounded-xl bg-primary px-6 py-3 font-semibold text-white shadow-lg shadow-primary/20 transition-colors hover:bg-primary-hover disabled:cursor-wait disabled:opacity-60"
+              className="btn btn-primary px-6 py-3 disabled:cursor-wait"
             >
               {isLoading ? 'Đang tạo...' : 'Tạo bộ đề từ PDF'}
             </button>
-            <label className="flex items-start gap-3 rounded-xl border border-border bg-surface-2 px-4 py-3 text-sm sm:col-span-2">
+            <label className="flex items-start gap-3 rounded-xl border border-border bg-background px-4 py-3 text-sm sm:col-span-2">
               <input
                 type="checkbox"
                 checked={removeDuplicates}
@@ -269,9 +273,9 @@ export function Overview() {
                   event.stopPropagation();
                   clearSelectedFile();
                 }}
-                className="ml-auto rounded-lg p-1 hover:bg-surface-2 hover:text-text"
-                aria-label="Bỏ file đã chọn"
-              >
+              className="icon-btn ml-auto min-h-8 min-w-8 rounded-lg"
+              aria-label="Bỏ file đã chọn"
+            >
                 <X size={16} />
               </button>
             </div>
@@ -282,34 +286,34 @@ export function Overview() {
           <div
             role={statusType === 'error' ? 'alert' : 'status'}
             aria-live={statusType === 'error' ? 'assertive' : 'polite'}
-            className={`mt-4 rounded-xl p-4 text-sm font-medium ${
+            className={`mt-4 rounded-xl border p-4 text-sm font-semibold ${
               statusType === 'error'
-                ? 'bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-300'
+                ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/60 dark:text-red-300'
                 : statusType === 'success'
-                  ? 'bg-green-100 text-green-700 dark:bg-green-950/60 dark:text-green-300'
-                  : 'bg-primary/10 text-primary'
+                  ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
+                  : 'border-primary/20 bg-primary-subtle text-primary'
             }`}
           >
-            {isLoading && <span className="inline-block animate-spin mr-2">⟳</span>}
+            {isLoading && <LoaderCircle size={16} className="mr-2 inline-block animate-spin" />}
             {status}
           </div>
         )}
       </section>
 
       {/* Neon Sync */}
-      <section className="rounded-2xl border border-border bg-surface p-4 shadow-sm sm:p-6">
+      <section className="card p-4 sm:p-6">
         <div className="flex items-start gap-3">
-          <div className={`rounded-xl p-2.5 ${syncState.connected ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-300' : 'bg-primary/10 text-primary'}`}>
+            <div className={`rounded-2xl p-2.5 ${syncState.connected ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-300' : 'bg-primary-subtle text-primary'}`}>
             {syncState.connected ? <Cloud size={22} /> : <CloudOff size={22} />}
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-lg font-bold text-text">Đồng bộ Neon</h3>
-              <span className={`rounded-full px-2 py-1 text-xs font-semibold ${syncState.connected ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300' : 'bg-surface-2 text-text-muted'}`}>
+                <span className={`badge ${syncState.connected ? 'badge-success' : 'badge-muted'}`}>
                 {syncState.connected ? 'Đã kết nối' : 'Chưa kết nối'}
               </span>
             </div>
-            <p className="mt-1 text-sm text-text-muted">{syncState.message}</p>
+            <p className="mt-1 text-sm leading-6 text-text-secondary">{syncState.message}</p>
             {syncState.lastSyncedAt && (
               <p className="mt-1 text-xs text-text-muted">
                 Cập nhật lúc {new Date(syncState.lastSyncedAt).toLocaleTimeString('vi-VN')}
@@ -331,14 +335,14 @@ export function Overview() {
                 }}
                 placeholder="Tạo hoặc nhập mã đồng bộ (ít nhất 8 ký tự)"
                 autoComplete="off"
-                className="min-h-11 w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-text outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15"
+                className="input px-4 py-2.5"
               />
             </label>
             <button
               type="button"
               onClick={() => void handleConnectSync()}
               disabled={syncState.phase === 'connecting' || syncCode.trim().length < 8}
-              className="min-h-11 rounded-xl bg-primary px-5 py-2.5 font-semibold text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+              className="btn btn-primary"
             >
               {syncState.phase === 'connecting' ? 'Đang kết nối…' : hasStoredSyncCode() ? 'Kết nối lại' : 'Bật đồng bộ'}
             </button>
@@ -349,7 +353,7 @@ export function Overview() {
               type="button"
               onClick={() => void syncCloudNow()}
               disabled={syncState.phase === 'syncing'}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:text-primary disabled:opacity-50"
+              className="btn btn-secondary disabled:opacity-50"
             >
               <RefreshCw size={17} className={syncState.phase === 'syncing' ? 'animate-spin' : ''} />
               Đồng bộ ngay
@@ -357,7 +361,7 @@ export function Overview() {
             <button
               type="button"
               onClick={disconnectCloudSync}
-              className="min-h-11 rounded-xl border border-border px-4 py-2 text-sm font-semibold text-text-muted transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600 dark:hover:border-red-800 dark:hover:bg-red-950/50 dark:hover:text-red-300"
+                className="btn btn-ghost text-text-muted hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/50 dark:hover:text-red-300"
             >
               Ngắt kết nối
             </button>
@@ -365,7 +369,7 @@ export function Overview() {
         )}
 
         {syncActionError && (
-          <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm font-medium text-red-700 dark:bg-red-950/60 dark:text-red-300" role="alert">
+          <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 dark:border-red-800 dark:bg-red-950/60 dark:text-red-300" role="alert">
             {syncActionError}
           </p>
         )}
@@ -375,7 +379,7 @@ export function Overview() {
       </section>
 
       {/* Bank Manager */}
-      <section className="bg-surface rounded-2xl border border-border overflow-hidden shadow-sm">
+      <section className="card overflow-hidden">
         <div className="flex flex-col gap-4 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <div className="min-w-0">
             <h3 className="text-xl font-bold text-text">Quản lý bộ đề</h3>
@@ -392,7 +396,7 @@ export function Overview() {
             <button
               type="button"
               onClick={() => backupInputRef.current?.click()}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+              className="btn btn-secondary px-3"
             >
               <Upload size={18} aria-hidden="true" />
               <span>Khôi phục</span>
@@ -400,7 +404,7 @@ export function Overview() {
             <button
               type="button"
               onClick={() => downloadBanksBackup(banks)}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+              className="btn btn-secondary px-3"
             >
               <Download size={18} aria-hidden="true" />
               <span>Sao lưu</span>
@@ -409,24 +413,24 @@ export function Overview() {
         </div>
         
         {exportError && (
-          <p className="m-4 rounded-xl bg-red-50 px-3 py-2 text-sm font-medium text-red-700 dark:bg-red-950/60 dark:text-red-300" role="alert">
+          <p className="m-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 dark:border-red-800 dark:bg-red-950/60 dark:text-red-300" role="alert">
             {exportError}
           </p>
         )}
 
         <div className="divide-y divide-border">
           {banks.map(bank => (
-            <div key={bank.id} className={`p-4 flex items-center justify-between transition-colors ${activeBankId === bank.id ? 'bg-primary/5' : 'hover:bg-surface-2'}`}>
-              <div className="flex-1 cursor-pointer" onClick={() => setActiveBank(bank.id)}>
-                <div className="flex items-center gap-3">
-                  <h4 className="font-semibold text-text">{bank.name}</h4>
+            <div key={bank.id} className={`flex items-center justify-between gap-2 p-4 transition-all duration-200 ${activeBankId === bank.id ? 'bg-primary-subtle/80' : 'hover:bg-background'}`}>
+              <div className="min-w-0 flex-1 cursor-pointer" onClick={() => setActiveBank(bank.id)}>
+                <div className="flex min-w-0 flex-wrap items-center gap-2.5">
+                  <h4 className="truncate text-base font-bold text-text">{bank.name}</h4>
                   {activeBankId === bank.id && (
-                    <span className="flex items-center gap-1 text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">
+                    <span className="badge badge-primary">
                       <CheckCircle2 size={12} /> Đang chọn
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-text-muted mt-1">
+                <p className="mt-1 text-sm text-text-muted">
                   {bank.report?.usableMultipleChoice ?? bank.questions.length} câu dùng được
                   {' • '}
                   Tạo ngày {new Date(bank.createdAt).toLocaleDateString('vi-VN')}
@@ -440,7 +444,7 @@ export function Overview() {
                   void handleExport(bank);
                 }}
                 disabled={Boolean(exportingBankId)}
-                className="ml-3 inline-flex shrink-0 items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-wait disabled:opacity-60"
+                className="btn btn-secondary ml-2 shrink-0 px-3 disabled:cursor-wait"
                 title={`Xuất ${bank.name} thành PDF Quizlet`}
                 aria-label={`Xuất ${bank.name} thành PDF Quizlet`}
               >
@@ -457,8 +461,9 @@ export function Overview() {
               {banks.length > 1 && (
                 <button 
                   onClick={() => deleteBank(bank.id)}
-                  className="p-2 text-text-muted hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors dark:hover:bg-red-950/50 dark:hover:text-red-300"
+                  className="icon-btn shrink-0 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/50 dark:hover:text-red-300"
                   title="Xóa bộ đề"
+                  aria-label="Xóa bộ đề"
                 >
                   <Trash2 size={20} />
                 </button>
